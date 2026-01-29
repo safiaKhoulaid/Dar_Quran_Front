@@ -1,0 +1,138 @@
+<!-- Hero Section -->
+<section class="hero">
+  <div class="hero-container">
+    <div class="hero-content">
+      <h1 class="hero-title">Learn the Quran <span class="highlight">Online</span></h1>
+      <p class="hero-subtitle">Master Quranic studies with expert teachers. Affordable Islamic education for kids and adults with certified online instructors.</p>
+      <div class="hero-actions">
+        <button class="btn btn-primary">Explore Courses</button>
+        <button class="btn btn-secondary">Find a Tutor</button>
+      </div>
+    </div>
+    <div class="hero-image">
+      <div class="image-placeholder">
+        <svg width="100%" height="100%" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="400" height="300" fill="#f0f7f3"/>
+          <g opacity="0.1">
+            <circle cx="200" cy="150" r="80" fill="#6B9B7A"/>
+            <circle cx="150" cy="100" r="50" fill="#6B9B7A"/>
+            <circle cx="300" cy="200" r="60" fill="#6B9B7A"/>
+          </g>
+          <text x="200" y="150" text-anchor="middle" font-size="48" font-weight="bold" fill="#6B9B7A" font-family="Poppins" opacity="0.3">📖</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Statistics Section -->
+<section class="stats-section">
+  <div class="stats-container">
+    <h2 class="section-title">Why Choose Our School</h2>
+    <div class="stats-grid">
+      <div *ngFor="let stat of stats" class="stat-card">
+        <div class="stat-number">{{ stat.number }}</div>
+        <div class="stat-label">{{ stat.label }}</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Featured Courses Section -->
+<section class="courses-section">
+  <div class="courses-container">
+    <div class="section-header">
+      <h2 class="section-title">Featured Courses</h2>
+      <p class="section-subtitle">Comprehensive courses designed for all levels</p>
+    </div>
+
+    <div class="courses-grid">
+      <div *ngFor="let course of courses" class="course-card">
+        <div class="course-image">
+          <img [src]="course.image" [alt]="course.title" loading="lazy">
+          <span class="course-level">{{ course.level }}</span>
+        </div>
+        <div class="course-content">
+          <h3 class="course-title">{{ course.title }}</h3>
+          <p class="course-desc">{{ course.description }}</p>
+          <div class="course-meta">
+            <span class="lesson-count">{{ course.lessons }} lessons</span>
+          </div>
+          <div class="course-footer">
+            <span class="course-price">{{ course.price }}</span>
+            <button class="btn-outline">Enroll Now</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Benefits Section -->
+<section class="benefits-section">
+  <div class="benefits-container">
+    <h2 class="section-title">How Our School Works</h2>
+    <div class="benefits-grid">
+      <div class="benefit-card">
+        <div class="benefit-icon">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="24" cy="24" r="20" fill="#f0f7f3" stroke="#6B9B7A" stroke-width="2"/>
+            <text x="24" y="28" text-anchor="middle" font-size="20" fill="#6B9B7A">1</text>
+          </svg>
+        </div>
+        <h3 class="benefit-title">Find Your Teacher</h3>
+        <p class="benefit-desc">Browse qualified tutors and find the perfect match for your learning goals.</p>
+      </div>
+
+      <div class="benefit-card">
+        <div class="benefit-icon">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="24" cy="24" r="20" fill="#f0f7f3" stroke="#6B9B7A" stroke-width="2"/>
+            <text x="24" y="28" text-anchor="middle" font-size="20" fill="#6B9B7A">2</text>
+          </svg>
+        </div>
+        <h3 class="benefit-title">Schedule Lessons</h3>
+        <p class="benefit-desc">Book flexible lessons at times that work best for your schedule.</p>
+      </div>
+
+      <div class="benefit-card">
+        <div class="benefit-icon">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="24" cy="24" r="20" fill="#f0f7f3" stroke="#6B9B7A" stroke-width="2"/>
+            <text x="24" y="28" text-anchor="middle" font-size="20" fill="#6B9B7A">3</text>
+          </svg>
+        </div>
+        <h3 class="benefit-title">Start Learning</h3>
+        <p class="benefit-desc">Begin your Islamic education journey with expert guidance and support.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="testimonials-section">
+  <div class="testimonials-container">
+    <h2 class="section-title">What Our Students Say</h2>
+    <div class="testimonials-grid">
+      <div *ngFor="let testimonial of testimonials" class="testimonial-card">
+        <div class="testimonial-stars">
+          <span *ngFor="let i of [1,2,3,4,5]" class="star">★</span>
+        </div>
+        <p class="testimonial-text">"{{ testimonial.comment }}"</p>
+        <div class="testimonial-author">
+          <strong>{{ testimonial.name }}</strong>
+          <span>{{ testimonial.role }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section">
+  <div class="cta-container">
+    <h2 class="cta-title">Ready to Start Learning?</h2>
+    <p class="cta-subtitle">Join thousands of students learning with us today</p>
+    <button class="btn btn-primary btn-large">Get Started Free Trial</button>
+  </div>
+</section>
