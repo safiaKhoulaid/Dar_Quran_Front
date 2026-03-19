@@ -1,0 +1,8 @@
+export enum Role {
+  SUPER_ADMIN,
+  ADMIN_SECTION,
+  ENSEIGNANT,
+  ELEVE,
+  PARENT,
+  PUBLIC,
+}
