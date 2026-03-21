@@ -1,0 +1,353 @@
+<div class="shell">
+
+    <!-- ═══════════════════════════ الجانب الأيمن (Sidebar) ═══════════════════════════ -->
+    <aside class="side-panel" aria-label="تنقل الإنشاء">
+
+        <!-- الشعار -->
+        <div class="brand">
+            <div class="brand-logo" aria-hidden="true">☽</div>
+            <span class="brand-text">دار القرآن</span>
+        </div>
+
+        <!-- العنوان الفرعي -->
+        <div class="side-hero">
+            <p class="side-eyebrow">محتوى جديد</p>
+            <h1 class="side-title">إنشاء دورة تعليمية</h1>
+            <p class="side-desc">
+                صمّم تجربة تعليمية متميزة — دروس، موارد وإعدادات في مكان واحد.
+            </p>
+        </div>
+
+        <!-- خطوات التنقل -->
+        <nav class="step-nav" aria-label="الخطوات">
+
+            <div class="step-item active">
+                <div class="step-indicator">
+                    <div class="step-number" aria-hidden="true">١</div>
+                    <div class="step-path"></div>
+                </div>
+                <div class="step-content">
+                    <div class="step-label">المعلومات الأساسية</div>
+                    <div class="step-hint">العنوان، المستوى والخصوصية</div>
+                </div>
+            </div>
+
+            <div class="step-item">
+                <div class="step-indicator">
+                    <div class="step-number" aria-hidden="true">٢</div>
+                    <div class="step-path"></div>
+                </div>
+                <div class="step-content">
+                    <div class="step-label">الدروس</div>
+                    <div class="step-hint">المحتوى والموارد التعليمية</div>
+                </div>
+            </div>
+
+            <div class="step-item">
+                <div class="step-indicator">
+                    <div class="step-number" aria-hidden="true">٣</div>
+                </div>
+                <div class="step-content">
+                    <div class="step-label">الصورة المصغرة</div>
+                    <div class="step-hint">صورة غلاف الدورة</div>
+                </div>
+            </div>
+
+        </nav>
+
+        <!-- التذييل الجانبي -->
+        <div class="side-footer">
+            <div class="auto-save-pill">
+                <span class="save-dot" aria-hidden="true"></span>
+                يتم حفظ بياناتك تلقائياً
+            </div>
+        </div>
+
+    </aside>
+
+    <!-- ═══════════════════════════ المحتوى الرئيسي ══════════════════════════ -->
+    <main class="main-content">
+
+        <!-- رسالة النجاح -->
+        @if (successMessage) {
+        <div class="success-toast" role="alert" aria-live="polite">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                aria-hidden="true">
+                <polyline points="20 6 9 17 4 12" />
+            </svg>
+            {{ successMessage }}
+        </div>
+        }
+
+        <form [formGroup]="courseForm" (ngSubmit)="onSubmit()" novalidate>
+
+            <!-- ─────────────────── البطاقة الأولى: المعلومات ─────────────────── -->
+            <section class="form-section">
+                <div class="section-badge">
+                    <span class="badge-dot" aria-hidden="true"></span>
+                    المرحلة الأولى
+                </div>
+                <h2 class="section-heading">المعلومات العامة</h2>
+                <p class="section-subheading">حدد العناصر الأساسية لدورتك التعليمية.</p>
+
+                <div class="form-grid">
+
+                    <!-- عنوان الدورة -->
+                    <div class="input-group">
+                        <label class="input-label" for="c-title">
+                            عنوان الدورة <span class="required-star" aria-hidden="true">*</span>
+                        </label>
+                        <input id="c-title" type="text" formControlName="title" class="form-input"
+                            [class.input-error]="courseForm.get('title')?.invalid && courseForm.get('title')?.touched"
+                            placeholder="مثال: مدخل إلى أحكام التجويد"
+                            (input)="generateSlug(courseForm.get('title')?.value)"
+                            [attr.aria-invalid]="courseForm.get('title')?.invalid && courseForm.get('title')?.touched"
+                            aria-describedby="title-error-msg" maxlength="255" autocomplete="off" />
+                        @if (courseForm.get('title')?.invalid && courseForm.get('title')?.touched) {
+                        <span id="title-error-msg" class="error-text" role="alert">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" aria-hidden="true">
+                                <circle cx="12" cy="12" r="10" />
+                                <line x1="12" y1="8" x2="12" y2="12" />
+                                <line x1="12" y1="16" x2="12.01" y2="16" />
+                            </svg>
+                            @if (courseForm.get('title')?.errors?.['required']) { العنوان مطلوب. }
+                            @if (courseForm.get('title')?.errors?.['minlength']) { يجب ألا يقل عن ٣ أحرف. }
+                        </span>
+                        }
+                    </div>
+
+                    <!-- الرابط المختصر -->
+                    <div class="input-group">
+                        <label class="input-label" for="c-slug">
+                            الرابط المختصر <span class="optional-text">(تلقائي)</span>
+                        </label>
+                        <input id="c-slug" type="text" formControlName="slug" class="form-input readonly-input"
+                            placeholder="سيتم إنشاؤه تلقائياً..." readonly aria-readonly="true" />
+                    </div>
+
+                    <!-- المستوى -->
+                    <div class="input-group">
+                        <label class="input-label" for="c-level">
+                            المستوى التعليمي <span class="required-star" aria-hidden="true">*</span>
+                        </label>
+                        <div class="select-wrapper">
+                            <select id="c-level" formControlName="level" class="form-select">
+                                <option value="" disabled>اختر مستوى الدورة...</option>
+                                <option value="beginner">🟢 مبتدئ</option>
+                                <option value="intermediate">🟡 متوسط</option>
+                                <option value="advanced">🔴 متقدم</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- الخصوصية -->
+                    <div class="input-group">
+                        <span class="input-label">الخصوصية</span>
+                        <div class="privacy-toggle"
+                            (click)="courseForm.get('isPublic')?.setValue(!courseForm.get('isPublic')?.value)">
+                            <div class="toggle-content">
+                                <div class="toggle-title">دورة عامة</div>
+                                <div class="toggle-description">تظهر لجميع الطلاب المسجلين</div>
+                            </div>
+                            <div class="toggle-switch" [class.switch-on]="courseForm.get('isPublic')?.value">
+                                <div class="switch-handle"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- الوصف -->
+                    <div class="input-group full-width">
+                        <label class="input-label" for="c-desc">وصف الدورة</label>
+                        <textarea id="c-desc" formControlName="description" class="form-textarea"
+                            [class.input-error]="courseForm.get('description')?.invalid && courseForm.get('description')?.touched"
+                            rows="4" placeholder="صف أهداف الدورة، المحتوى والمتطلبات السابقة..." maxlength="2000"
+                            aria-describedby="desc-char-count"></textarea>
+                        <div class="char-count-row">
+                            @if (courseForm.get('description')?.invalid && courseForm.get('description')?.touched) {
+                            <span class="error-text" role="alert">يجب إدخال ١٠ أحرف على الأقل.</span>
+                            } @else { <span></span> }
+                            <span id="desc-char-count" class="char-counter">
+                                {{ courseForm.get('description')?.value?.length || 0 }} / ٢٠٠٠
+                            </span>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- ─────────────────── البطاقة الثانية: الدروس ──────────────────────── -->
+            <section class="form-section">
+                <div class="header-action-row">
+                    <div class="heading-group">
+                        <h2 class="section-heading-with-icon">
+                            <span class="section-icon">📖</span>
+                            الدروس التعليمية
+                        </h2>
+                        <p class="section-subheading-simple">تمت إضافة {{ lessonsArray.length }} درس حتى الآن</p>
+                    </div>
+                    <button type="button" class="btn-secondary-light" (click)="addLesson()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5">
+                            <line x1="12" y1="5" x2="12" y2="19" />
+                            <line x1="5" y1="12" x2="19" y2="12" />
+                        </svg>
+                        إضافة درس جديد
+                    </button>
+                </div>
+
+                @if (lessonsArray.length === 0) {
+                <div class="empty-lessons-cta" (click)="addLesson()">
+                    <div class="empty-icon">📂</div>
+                    <p>لا توجد دروس حالياً. ابدأ بإضافة درسك الأول وبناء محتوى دورتك!</p>
+                </div>
+                }
+
+                @for (lessonCtrl of lessonsArray.controls; track lessonCtrl; let i = $index) {
+                <div class="lesson-box">
+                    <div class="lesson-bar">
+                        <span class="lesson-order">الدرس {{ i + 1 }}</span>
+                        <span class="lesson-title-preview">{{ getLessonControl(i, 'title').value || 'عنوان الدرس...'
+                            }}</span>
+                        <button type="button" class="delete-link" (click)="removeLesson(i)"
+                            [attr.aria-label]="'حذف الدرس ' + (i + 1)">
+                            حذف الدرس
+                        </button>
+                    </div>
+
+                    <div class="lesson-inner">
+                        <div class="form-grid">
+                            <div class="input-group">
+                                <label class="input-label" [for]="'l-title-' + i">عنوان الدرس</label>
+                                <input [id]="'l-title-' + i" type="text" [formControl]="getLessonControl(i, 'title')"
+                                    class="form-input" placeholder="مثل: المقدمة في أحكام النون الساكنة" />
+                            </div>
+                            <div class="input-group">
+                                <label class="input-label" [for]="'l-order-' + i">الترتيب</label>
+                                <input [id]="'l-order-' + i" type="number" [formControl]="getLessonControl(i, 'order')"
+                                    class="form-input" min="1" />
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label class="input-label" [for]="'l-desc-' + i">وصف الدرس</label>
+                            <textarea [id]="'l-desc-' + i" [formControl]="getLessonControl(i, 'description')"
+                                class="form-textarea" rows="2"
+                                placeholder="ماذا سيتعلم الطالب في هذا الدرس؟"></textarea>
+                        </div>
+
+                        <!-- الموارد التعليمية -->
+                        <div class="resource-container">
+                            <div class="resource-header">
+                                <span class="resource-title">الموارد التعليمية</span>
+                                <button type="button" class="btn-micro" (click)="addResource(i)">إضافة مورد</button>
+                            </div>
+
+                            @if (getResources(i).length === 0) {
+                            <p class="resource-empty-msg">لم يتم إضافة موارد (ملفات PDF، فيديوهات، أو نصوص).</p>
+                            }
+
+                            @for (r of getResources(i); track r; let j = $index) {
+                            <div class="resource-row">
+                                <div class="resource-type-indicator"
+                                    [class]="'type-' + getResourceType(i, j).toLowerCase()">
+                                    {{ getResourceType(i, j) === 'TEXT' ? 'نص' : getResourceType(i, j) === 'PDF' ? 'PDF'
+                                    : 'فيديو' }}
+                                </div>
+
+                                <div class="resource-inputs-grid">
+                                    <input type="text" [formControl]="getResourceControl(i, j, 'name')"
+                                        class="form-input-compact" placeholder="اسم المورد" />
+                                    <select [formControl]="getResourceControl(i, j, 'type')"
+                                        class="form-select-compact">
+                                        <option value="TEXT">📝 نص</option>
+                                        <option value="PDF">📄 ملف PDF</option>
+                                        <option value="VIDEO">🎥 فيديو</option>
+                                    </select>
+                                    <input type="text" [formControl]="getResourceControl(i, j, 'url')"
+                                        class="form-input-compact" placeholder="الرابط (URL)" />
+                                </div>
+
+                                <button type="button" class="btn-remove-micro" (click)="removeResource(i, j)"
+                                    [attr.aria-label]="'حذف المورد ' + (j + 1)">✕</button>
+                            </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+                }
+            </section>
+
+            <!-- ─────────────────── البطاقة الثالثة: الصورة ───────────────────── -->
+            <section class="form-section">
+                <h2 class="section-heading-with-icon">
+                    <span class="section-icon">🖼️</span>
+                    غلاف الدورة
+                </h2>
+                <p class="section-subheading-simple">اختر صورة تعبر عن محتوى دورتك (صيغة PNG أو JPG، بحد أقصى ٥
+                    ميجابايت)</p>
+
+                @if (!thumbnailPreview) {
+                <div class="upload-area" (click)="fileInput.click()" role="button" tabindex="0"
+                    (keydown.enter)="fileInput.click()">
+                    <div class="upload-icon-box">📁</div>
+                    <p class="upload-text-main">اسحب الصورة هنا أو اضغط للاختيار</p>
+                    <p class="upload-text-sub">الحد الأقصى للملف: ٥ ميجابايت</p>
+                </div>
+                }
+
+                @if (thumbnailPreview) {
+                <div class="image-preview-box">
+                    <img [src]="thumbnailPreview" alt="معاينة الغلاف" class="preview-img" />
+                    <button type="button" class="remove-image-btn" (click)="removeThumbnail()">حذف الصورة</button>
+                </div>
+                }
+
+                <input #fileInput type="file" hidden accept="image/*" (change)="onThumbnailSelect($event)" />
+            </section>
+
+            <!-- ─────────────────── الإجراءات النهائية ───────────────────────────────── -->
+            <div class="action-footer">
+                <button type="button" class="btn-ghost-light" (click)="resetForm()">إعادة تعيين</button>
+                <button type="submit" class="btn-primary-green"
+                    [disabled]="courseForm.invalid || lessonsArray.length === 0">
+                    نشر الدورة التعليمية
+                </button>
+            </div>
+
+        </form>
+
+        <!-- ════════════ دوراتي الحالية ════════════ -->
+        @if (courses.length > 0) {
+        <section class="saved-courses-area">
+            <div class="area-header">
+                <div class="area-badge">المكتبة</div>
+                <h2 class="area-title">دوراتي المسجلة</h2>
+            </div>
+
+            <div class="courses-flex-grid">
+                @for (course of courses; track course.id) {
+                <article class="course-mini-card">
+                    @if (course.miniature) {
+                    <img [src]="course.miniature" class="mini-card-thumb" alt="غلاف الدورة" />
+                    } @else {
+                    <div class="mini-card-thumb-placeholder">📚</div>
+                    }
+                    <div class="mini-card-content">
+                        <div class="card-meta">
+                            <span class="card-level-badge" [class]="'lvl-' + course.level">{{ course.level ===
+                                'beginner' ? 'مبتدئ' : course.level === 'intermediate' ? 'متوسط' : 'متقدم' }}</span>
+                            <span class="card-visibility">{{ course.isPublic ? '🌐 عام' : '🔒 خاص' }}</span>
+                        </div>
+                        <h3 class="card-course-title">{{ course.title }}</h3>
+                        <p class="card-course-info">{{ course.lessons?.length || 0 }} درس</p>
+                        <button type="button" class="btn-delete-card" (click)="deleteCourse(course.id)">حذف</button>
+                    </div>
+                </article>
+                }
+            </div>
+        </section>
+        }
+
+    </main>
+</div>

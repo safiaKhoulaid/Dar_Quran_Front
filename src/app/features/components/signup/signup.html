@@ -1,0 +1,93 @@
+<div class="auth-page-wrapper fade-in">
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="auth-logo">
+                <i class="fas fa-user-plus"></i>
+            </div>
+            <h1 class="auth-title">إنشاء حساب جديد</h1>
+            <p class="auth-subtitle">انضم إلينا وابدأ رحلتك في تعلم القرآن الكريم</p>
+        </div>
+
+        @if (errorMessage()) {
+        <div class="auth-error-badge">
+            <i class="fas fa-exclamation-circle"></i>
+            <span>{{ errorMessage() }}</span>
+        </div>
+        }
+
+        @if (successMessage()) {
+        <div class="auth-success-badge">
+            <i class="fas fa-check-circle"></i>
+            <span>{{ successMessage() }}</span>
+        </div>
+        }
+
+        <form [formGroup]="signupForm" (ngSubmit)="onSubmit()" class="auth-form">
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="auth-input-group">
+                    <label for="firstname" class="auth-label">الاسم</label>
+                    <div class="auth-input-wrapper">
+                        <input type="text" id="firstname" formControlName="firstname" class="auth-input"
+                            placeholder="الاسم" />
+                        <i class="fas fa-user text-xs"></i>
+                    </div>
+                </div>
+                <div class="auth-input-group">
+                    <label for="lastname" class="auth-label">اللقب</label>
+                    <div class="auth-input-wrapper">
+                        <input type="text" id="lastname" formControlName="lastname" class="auth-input"
+                            placeholder="اللقب" />
+                        <i class="fas fa-user-tag text-xs"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="auth-input-group">
+                <label for="email" class="auth-label">البريد الإلكتروني</label>
+                <div class="auth-input-wrapper">
+                    <input type="email" id="email" formControlName="email" class="auth-input"
+                        placeholder="email@example.com" />
+                    <i class="fas fa-envelope"></i>
+                </div>
+            </div>
+
+            <div class="auth-input-group">
+                <label for="password" class="auth-label">كلمة المرور</label>
+                <div class="auth-input-wrapper">
+                    <input [type]="showPassword() ? 'text' : 'password'" id="password" formControlName="password"
+                        class="auth-input" placeholder="••••••••" />
+                    <i (click)="togglePasswordVisibility()" class="fas cursor-pointer" [class.fa-eye]="!showPassword()"
+                        [class.fa-eye-slash]="showPassword()"></i>
+                </div>
+            </div>
+
+            <div class="auth-input-group">
+                <label for="confirmPassword" class="auth-label">تأكيد كلمة المرور</label>
+                <div class="auth-input-wrapper">
+                    <input type="password" id="confirmPassword" formControlName="confirmPassword" class="auth-input"
+                        placeholder="••••••••" />
+                    <i class="fas fa-lock"></i>
+                </div>
+                @if (signupForm.errors?.['mismatch'] && signupForm.get('confirmPassword')?.touched) {
+                <span class="text-[10px] text-red-500 mt-1 font-bold">كلمات المرور غير متطابقة</span>
+                }
+            </div>
+
+            <button type="submit" class="auth-btn-submit" [disabled]="isLoading() || signupForm.invalid">
+                @if (!isLoading()) {
+                <span>إنشاء الحساب</span>
+                } @else {
+                <span class="flex items-center justify-center gap-2">
+                    <i class="fas fa-circle-notch fa-spin"></i>
+                    جاري المعالجة...
+                </span>
+                }
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            <p>لديك حساب بالفعل؟ <a routerLink="/login" class="auth-link">تسجيل الدخول</a></p>
+        </div>
+    </div>
+</div>

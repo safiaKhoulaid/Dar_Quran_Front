@@ -1,0 +1,432 @@
+<div class="student-dashboard" dir="rtl">
+
+    <!-- Mobile Backdrop -->
+    @if (isSidebarOpen()) {
+    <div class="fixed inset-0 bg-black/50 z-[90] show-mobile" (click)="toggleSidebar()"></div>
+    }
+
+    <!-- ═══ SIDEBAR ═══ -->
+    <aside class="std-sidebar" [class.open]="isSidebarOpen()">
+        <div class="std-sidebar-top">
+            <!-- Logo -->
+            <div class="std-logo">
+                <div class="flex items-center">
+                    <div class="std-logo-icon">
+                        <svg width="24" height="24" viewBox="0 0 36 36" fill="none">
+                            <circle cx="18" cy="18" r="16" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.3)"
+                                stroke-width="1.5" />
+                            <text x="18" y="23" text-anchor="middle" font-size="13" font-weight="bold" fill="white"
+                                font-family="Tajawal">ق</text>
+                        </svg>
+                    </div>
+                    <span class="mr-2">دار القرآن</span>
+                </div>
+                <!-- Close button for mobile -->
+                <button (click)="toggleSidebar()" class="show-mobile p-2 text-white/70">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Avatar -->
+            <div class="std-avatar-wrap">
+                <div class="std-avatar-ring">
+                    <div class="std-avatar">{{ getInitials() }}</div>
+                </div>
+                <div class="std-avatar-info">
+                    <p class="std-avatar-name">{{ currentUser()?.prenom }} {{ currentUser()?.nom }}</p>
+                    <span class="std-role-badge">طالب</span>
+                </div>
+            </div>
+
+            <!-- Nav -->
+            <nav class="std-nav" aria-label="قائمة لوحة الطالب">
+                <button class="std-nav-item" [class.active]="activeTab() === 'profile'" (click)="selectTab('profile')">
+                    <span class="std-nav-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                            <circle cx="12" cy="7" r="4" />
+                        </svg>
+                    </span>
+                    <span>الملف الشخصي</span>
+                </button>
+                <button class="std-nav-item" [class.active]="activeTab() === 'notifications'"
+                    (click)="selectTab('notifications')">
+                    <span class="std-nav-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                        </svg>
+                    </span>
+                    <span>الإشعارات</span>
+                    @if (unreadCount() > 0) {
+                    <span class="std-badge-count">{{ unreadCount() }}</span>
+                    }
+                </button>
+                <button class="std-nav-item" [class.active]="activeTab() === 'absences'"
+                    (click)="selectTab('absences')">
+                    <span class="std-nav-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" />
+                            <line x1="16" y1="2" x2="16" y2="6" />
+                            <line x1="8" y1="2" x2="8" y2="6" />
+                            <line x1="3" y1="10" x2="21" y2="10" />
+                        </svg>
+                    </span>
+                    <span>الغيابات</span>
+                    @if (unjustifiedAbsences() > 0) {
+                    <span class="std-badge-warn">{{ unjustifiedAbsences() }}</span>
+                    }
+                </button>
+                <button class="std-nav-item" [class.active]="activeTab() === 'grades'" (click)="selectTab('grades')">
+                    <span class="std-nav-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <polygon
+                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                        </svg>
+                    </span>
+                    <span>النقاط والتقديرات</span>
+                </button>
+            </nav>
+        </div>
+
+        <div class="std-sidebar-bottom">
+            <div class="std-overall-card">
+                <p class="std-overall-label">المعدل العام</p>
+                <p class="std-overall-value" [class]="getGradeColor(getOverallAverage())">{{ getOverallAverage() }}/20
+                </p>
+                <div class="std-grade-bar">
+                    <div class="std-grade-fill" [style.width]="getProgressWidth(getOverallAverage(), 20)"></div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ═══ MAIN CONTENT ═══ -->
+    <main class="std-main">
+
+        <!-- ╌ PROFILE TAB ╌ -->
+        @if (activeTab() === 'profile') {
+        <div class="std-section fade-in-up">
+            <header class="show-mobile flex justify-between items-center mb-6">
+                <button (click)="toggleSidebar()" class="p-2 text-indigo-600 bg-indigo-50 rounded-lg">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+                <div class="text-sm font-bold text-indigo-900">الملف الشخصي</div>
+            </header>
+            <div class="std-section-header">
+                <h1 class="std-section-title">
+                    <span class="std-title-icon">👤</span>
+                    الملف الشخصي
+                </h1>
+                @if (!isEditingProfile()) {
+                <button class="std-btn-edit" (click)="startEdit()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                    </svg>
+                    تعديل الملف
+                </button>
+                }
+            </div>
+
+            @if (profileSaved()) {
+            <div class="std-alert std-alert-success">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12" />
+                </svg>
+                تم حفظ التغييرات بنجاح!
+            </div>
+            }
+
+            <div class="std-profile-hero">
+                <div class="std-hero-avatar">
+                    <div class="std-hero-initials">{{ getInitials() }}</div>
+                    <div class="std-hero-status"></div>
+                </div>
+                <div class="std-hero-info">
+                    <h2 class="std-hero-name">{{ currentUser()?.prenom }} {{ currentUser()?.nom }}</h2>
+                    <p class="std-hero-detail">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                            <polyline points="22,6 12,13 2,6" />
+                        </svg>
+                        {{ currentUser()?.email || 'البريد الإلكتروني غير محدد' }}
+                    </p>
+                    <p class="std-hero-detail">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path
+                                d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.65 3.38 2 2 0 0 1 3.62 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.96a16 16 0 0 0 6.13 6.13l.86-.86a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
+                        </svg>
+                        {{ currentUser()?.telephone || 'الهاتف غير محدد' }}
+                    </p>
+                    <div class="std-hero-tags">
+                        <span class="std-tag std-tag-role">طالب</span>
+                        <span class="std-tag std-tag-section">قسم الذكور</span>
+                    </div>
+                </div>
+            </div>
+
+            @if (isEditingProfile()) {
+            <div class="std-form-card fade-in-up">
+                <h3 class="std-form-title">تعديل المعلومات الشخصية</h3>
+                <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="std-form">
+                    <div class="std-form-grid">
+                        <div class="std-field">
+                            <label class="std-label">الاسم الأول</label>
+                            <input type="text" formControlName="prenom" class="std-input"
+                                placeholder="أدخل الاسم الأول">
+                        </div>
+                        <div class="std-field">
+                            <label class="std-label">اللقب</label>
+                            <input type="text" formControlName="nom" class="std-input" placeholder="أدخل اللقب">
+                        </div>
+                        <div class="std-field">
+                            <label class="std-label">البريد الإلكتروني</label>
+                            <input type="email" formControlName="email" class="std-input"
+                                placeholder="example@email.com" dir="ltr">
+                        </div>
+                        <div class="std-field">
+                            <label class="std-label">رقم الهاتف</label>
+                            <input type="tel" formControlName="telephone" class="std-input" placeholder="+212 ..."
+                                dir="ltr">
+                        </div>
+                        <div class="std-field std-field-full">
+                            <label class="std-label">العنوان</label>
+                            <input type="text" formControlName="adresse" class="std-input" placeholder="العنوان الكامل">
+                        </div>
+                    </div>
+                    <div class="std-form-actions">
+                        <button type="submit" class="std-btn-save" [disabled]="profileForm.invalid">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <polyline points="20 6 9 17 4 12" />
+                            </svg>
+                            حفظ التغييرات
+                        </button>
+                        <button type="button" class="std-btn-cancel" (click)="cancelEdit()">إلغاء</button>
+                    </div>
+                </form>
+            </div>
+            } @else {
+            <div class="std-info-grid">
+                <div class="std-info-card">
+                    <div class="std-info-icon">📧</div>
+                    <div>
+                        <p class="std-info-label">البريد الإلكتروني</p>
+                        <p class="std-info-value" dir="ltr">{{ currentUser()?.email || '—' }}</p>
+                    </div>
+                </div>
+                <div class="std-info-card">
+                    <div class="std-info-icon">📱</div>
+                    <div>
+                        <p class="std-info-label">رقم الهاتف</p>
+                        <p class="std-info-value" dir="ltr">{{ currentUser()?.telephone || '—' }}</p>
+                    </div>
+                </div>
+                <div class="std-info-card">
+                    <div class="std-info-icon">📍</div>
+                    <div>
+                        <p class="std-info-label">العنوان</p>
+                        <p class="std-info-value">{{ currentUser() || '—' }}</p>
+                    </div>
+                </div>
+                <div class="std-info-card">
+                    <div class="std-info-icon">🎓</div>
+                    <div>
+                        <p class="std-info-label">الدور</p>
+                        <p class="std-info-value">طالب - قسم الذكور</p>
+                    </div>
+                </div>
+            </div>
+            }
+        </div>
+        }
+
+        <!-- ╌ NOTIFICATIONS TAB ╌ -->
+        @if (activeTab() === 'notifications') {
+        <div class="std-section fade-in-up">
+            <header class="show-mobile flex justify-between items-center mb-6">
+                <button (click)="toggleSidebar()" class="p-2 text-indigo-600 bg-indigo-50 rounded-lg">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+                <div class="text-sm font-bold text-indigo-900">الإشعارات</div>
+            </header>
+            <div class="std-section-header">
+                <h1 class="std-section-title">
+                    <span class="std-title-icon">🔔</span>
+                    الإشعارات
+                    @if (unreadCount() > 0) {
+                    <span class="std-title-count">{{ unreadCount() }} غير مقروءة</span>
+                    }
+                </h1>
+                @if (unreadCount() > 0) {
+                <button class="std-btn-secondary" (click)="markAllRead()">تحديد الكل كمقروء</button>
+                }
+            </div>
+
+            <div class="std-notif-list">
+                @for (notif of notifications(); track notif.id) {
+                <div class="std-notif-item" [class.unread]="!notif.read" [class]="'notif-' + notif.type"
+                    (click)="markRead(notif.id)">
+                    <div class="std-notif-dot" [class]="'dot-' + notif.type"></div>
+                    <div class="std-notif-content">
+                        <div class="std-notif-header-row">
+                            <p class="std-notif-title">{{ notif.title }}</p>
+                            <span class="std-notif-date">{{ notif.date | date:'d MMM' }}</span>
+                        </div>
+                        <p class="std-notif-msg">{{ notif.message }}</p>
+                    </div>
+                    @if (!notif.read) {
+                    <div class="std-unread-indicator" aria-label="غير مقروء"></div>
+                    }
+                </div>
+                }
+            </div>
+        </div>
+        }
+
+        <!-- ╌ ABSENCES TAB ╌ -->
+        @if (activeTab() === 'absences') {
+        <div class="std-section fade-in-up">
+            <header class="show-mobile flex justify-between items-center mb-6">
+                <button (click)="toggleSidebar()" class="p-2 text-indigo-600 bg-indigo-50 rounded-lg">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+                <div class="text-sm font-bold text-indigo-900">الغيابات</div>
+            </header>
+            <div class="std-section-header">
+                <h1 class="std-section-title">
+                    <span class="std-title-icon">📅</span>
+                    سجل الغيابات
+                </h1>
+            </div>
+
+            <!-- Stats -->
+            <div class="std-abs-stats">
+                <div class="std-stat-card stat-total">
+                    <p class="std-stat-num">{{ totalAbsences() }}</p>
+                    <p class="std-stat-lbl">إجمالي الغيابات</p>
+                </div>
+                <div class="std-stat-card stat-justified">
+                    <p class="std-stat-num">{{ justifiedAbsences() }}</p>
+                    <p class="std-stat-lbl">غيابات مبررة</p>
+                </div>
+                <div class="std-stat-card stat-unjustified">
+                    <p class="std-stat-num">{{ unjustifiedAbsences() }}</p>
+                    <p class="std-stat-lbl">غيابات غير مبررة</p>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div class="std-card">
+                <div class="std-table-wrap">
+                    <table class="std-table">
+                        <thead>
+                            <tr>
+                                <th>المادة</th>
+                                <th>التاريخ</th>
+                                <th>الحالة</th>
+                                <th>السبب</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (abs of absences(); track abs.id) {
+                            <tr>
+                                <td>
+                                    <span class="std-subject-tag">{{ abs.subject }}</span>
+                                </td>
+                                <td class="std-date-cell">{{ abs.date | date:'EEEE d MMMM' }}</td>
+                                <td>
+                                    @if (abs.justified) {
+                                    <span class="std-status std-status-ok">✓ مبررة</span>
+                                    } @else {
+                                    <span class="std-status std-status-err">✗ غير مبررة</span>
+                                    }
+                                </td>
+                                <td class="std-reason">{{ abs.reason || '—' }}</td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        }
+
+        <!-- ╌ GRADES TAB ╌ -->
+        @if (activeTab() === 'grades') {
+        <div class="std-section fade-in-up">
+            <header class="show-mobile flex justify-between items-center mb-6">
+                <button (click)="toggleSidebar()" class="p-2 text-indigo-600 bg-indigo-50 rounded-lg">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+                <div class="text-sm font-bold text-indigo-900">النقاط</div>
+            </header>
+            <div class="std-section-header">
+                <h1 class="std-section-title">
+                    <span class="std-title-icon">⭐</span>
+                    النقاط والتقديرات
+                </h1>
+                <div class="std-overall-pill" [class]="getGradeColor(getOverallAverage())">
+                    المعدل العام: {{ getOverallAverage() }}/20
+                </div>
+            </div>
+
+            <div class="std-grades-grid">
+                @for (grade of grades(); track grade.subject) {
+                <div class="std-grade-card">
+                    <div class="std-grade-card-header">
+                        <span class="std-grade-subject-icon">{{ grade.icon }}</span>
+                        <div class="std-grade-subject-info">
+                            <p class="std-grade-subject-name">{{ grade.subject }}</p>
+                            <p class="std-grade-coef">معامل {{ grade.coefficient }}</p>
+                        </div>
+                        <div class="std-grade-avg-badge" [class]="getGradeColor(getSubjectAverage(grade))">
+                            {{ getSubjectAverage(grade) }}/20
+                        </div>
+                    </div>
+
+                    <div class="std-grade-detail-list">
+                        @for (g of grade.grades; track g.label) {
+                        <div class="std-grade-detail">
+                            <div class="std-grade-detail-top">
+                                <span class="std-grade-detail-label">{{ g.label }}</span>
+                                <span class="std-grade-detail-val">{{ g.value }}/{{ g.outOf }}</span>
+                            </div>
+                            <div class="std-grade-progress">
+                                <div class="std-grade-progress-fill" [class]="getGradeColor(g.value / g.outOf * 20)"
+                                    [style.width]="getProgressWidth(g.value, g.outOf)"></div>
+                            </div>
+                        </div>
+                        }
+                    </div>
+                </div>
+                }
+            </div>
+        </div>
+        }
+
+    </main>
+</div>

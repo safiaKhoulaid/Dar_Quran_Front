@@ -1,0 +1,143 @@
+.live-admin-page {
+  min-height: 100vh;
+  padding: 2rem 1rem;
+  background: #f3f4f6;
+}
+
+.live-admin-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.1);
+}
+
+.title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #111827;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.input {
+  margin-right: 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.85rem;
+}
+
+.btn {
+  border-radius: 999px;
+  border: none;
+  padding: 0.4rem 1.1rem;
+  background: linear-gradient(135deg, #0ea5e9, #0369a1);
+  color: #fff;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.btn-small {
+  padding: 0.25rem 0.8rem;
+  font-size: 0.8rem;
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, #ef4444, #b91c1c);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.table th,
+.table td {
+  padding: 0.5rem 0.6rem;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: right;
+}
+
+.cell-main .title-cell {
+  font-weight: 600;
+  color: #111827;
+}
+
+.cell-main .sub {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1rem 0.6rem;
+  border-radius: 999px;
+  background: #e5e7eb;
+  font-size: 0.75rem;
+}
+
+.badge-live {
+  background: rgba(239, 68, 68, 0.15);
+  color: #b91c1c;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.link {
+  font-size: 0.8rem;
+  color: #0369a1;
+  text-decoration: none;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+.hint {
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.alert {
+  margin-top: 0.75rem;
+  padding: 0.6rem 0.9rem;
+  border-radius: 0.75rem;
+  font-size: 0.85rem;
+}
+
+.alert-error {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+@media (max-width: 768px) {
+  .live-admin-container {
+    padding: 1.1rem;
+  }
+
+  .table th,
+  .table td {
+    font-size: 0.75rem;
+  }
+}
+

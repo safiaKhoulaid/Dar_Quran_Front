@@ -1,0 +1,389 @@
+<div class="py-6 dar-dashboard fade-in">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+    <div class="page-header">
+      <h1 class="page-title">{{ title() }}</h1>
+      <button type="button" class="btn-modern btn-primary-modern" (click)="openAddModal()" [disabled]="loading()">
+        <i class="fas fa-plus ml-2"></i> {{ addButtonLabel() }}
+      </button>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+    <div class="py-4">
+      @if (loading()) {
+      <div class="badge-info modern-badge mb-4 w-full justify-center py-2">
+        <i class="fas fa-spinner fa-spin ml-2"></i> جاري تحميل قائمة المشرفين...
+      </div>
+      }
+
+      @if (successMessage()) {
+      <div class="badge-success modern-badge mb-4 w-full justify-between py-2 px-4 shadow-sm">
+        <span><i class="fas fa-check-circle ml-2"></i> {{ successMessage() }}</span>
+        <button (click)="successMessage.set('')" class="opacity-50 hover:opacity-100"><i
+            class="fas fa-times"></i></button>
+      </div>
+      }
+
+      @if (errorMessage()) {
+      <div class="badge-danger modern-badge mb-4 w-full justify-between py-2 px-4 shadow-sm">
+        <span><i class="fas fa-exclamation-triangle ml-2"></i> {{ errorMessage() }}</span>
+        <button (click)="errorMessage.set('')" class="opacity-50 hover:opacity-100"><i
+            class="fas fa-times"></i></button>
+      </div>
+      }
+
+      <!-- Search and Stats Card -->
+      <div class="modern-card p-6 mb-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div class="flex items-center gap-6">
+          <div class="flex flex-col">
+            <span class="text-xs font-bold text-slate-400 uppercase mb-1">إجمالي المشرفين</span>
+            <span class="text-2xl font-black text-primary">{{ list().length }}</span>
+          </div>
+          <div class="h-10 w-px bg-slate-100"></div>
+          <div class="flex gap-4">
+            <div class="flex flex-col">
+              <span class="text-[10px] font-bold text-blue-500 uppercase">ذكور</span>
+              <span class="text-lg font-bold">{{ listMale().length }}</span>
+            </div>
+            <div class="flex flex-col">
+              <span class="text-[10px] font-bold text-pink-500 uppercase">إناث</span>
+              <span class="text-lg font-bold">{{ listFemale().length }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="relative flex-1 max-w-md">
+          <div class="input-with-icon">
+            <i class="fas fa-search text-slate-400"></i>
+            <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
+              placeholder="البحث بالاسم أو البريد أو الهاتف..." class="w-full">
+          </div>
+        </div>
+      </div>
+
+      <!-- Gender Tabs -->
+      <div class="mb-8 border-b border-slate-200">
+        <ul class="flex flex-wrap -mb-px text-sm font-medium text-center">
+          <li class="ml-4">
+            <a href="#" class="sidebar-link pb-3 rounded-none border-b-2" [class.active]="gender() === 'HOMME'"
+              [style.border-color]="gender() === 'HOMME' ? 'var(--accent)' : 'transparent'"
+              (click)="setGender('HOMME'); $event.preventDefault()">
+              <i class="fas fa-male ml-2"></i> مشرفي قسم الذكور
+            </a>
+          </li>
+          <li>
+            <a href="#" class="sidebar-link pb-3 rounded-none border-b-2" [class.active]="gender() === 'FEMME'"
+              [style.border-color]="gender() === 'FEMME' ? 'var(--accent)' : 'transparent'"
+              (click)="setGender('FEMME'); $event.preventDefault()">
+              <i class="fas fa-female ml-2"></i> مشرفات قسم الإناث
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      @if (gender() === 'HOMME') {
+      <div class="gender-panel">
+        <div class="modern-card section-card">
+          <div class="section-header bg-slate-50/50">
+            <h3 class="text-blue-700 font-bold"><i class="fas fa-user-shield ml-2"></i> مشرفي قسم الذكور</h3>
+          </div>
+          <div class="modern-table-wrapper">
+            <table class="modern-table">
+              <thead>
+                <tr>
+                  <th>الاسم</th>
+                  <th>البريد الإلكتروني</th>
+                  <th>تاريخ الإنشاء</th>
+                  <th>الإجراءات</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (admin of listMaleFiltered(); track admin.id) {
+                <tr>
+                  <td>
+                    <div class="flex items-center gap-3">
+                      <div class="avatar-initials avatar-initials-blue">
+                        {{ admin.prenom?.[0] }}{{ admin.nom?.[0] }}
+                      </div>
+                      <div>
+                        <div class="font-bold text-sm">{{ admin.prenom }} {{ admin.nom }}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="text-xs text-slate-500" dir="ltr">{{ admin.email }}</td>
+                  <td class="text-xs text-slate-400">{{ admin.createdAt | date:'shortDate' }}</td>
+                  <td>
+                    <div class="flex gap-1">
+                      <button type="button" class="table-action-btn table-action-btn-view" (click)="viewDetails(admin)"
+                        title="عرض"><i class="fas fa-eye"></i></button>
+                      <button type="button" class="table-action-btn table-action-btn-edit" (click)="editItem(admin)"
+                        title="تعديل"><i class="fas fa-pen"></i></button>
+                      <button type="button" class="table-action-btn table-action-btn-delete"
+                        (click)="confirmDelete(admin)" [disabled]="loadingDelete()" title="حذف"><i
+                          class="fas fa-trash"></i></button>
+                    </div>
+                  </td>
+                </tr>
+                } @empty {
+                <tr>
+                  <td colspan="4" class="text-center py-10 text-slate-400">{{ searchQuery() ? 'لا توجد نتائج' : 'لا يوجد
+                    مشرفين حالياً' }}</td>
+                </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      }
+
+      @if (gender() === 'FEMME') {
+      <div class="gender-panel">
+        <div class="modern-card section-card">
+          <div class="section-header bg-pink-50/30">
+            <h3 class="text-pink-700 font-bold"><i class="fas fa-user-shield ml-2"></i> مشرفات قسم الإناث</h3>
+          </div>
+          <div class="modern-table-wrapper">
+            <table class="modern-table">
+              <thead>
+                <tr>
+                  <th>الاسم</th>
+                  <th>البريد الإلكتروني</th>
+                  <th>تاريخ الإنشاء</th>
+                  <th>الإجراءات</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (admin of listFemaleFiltered(); track admin.id) {
+                <tr>
+                  <td>
+                    <div class="flex items-center gap-3">
+                      <div class="avatar-initials avatar-initials-pink">
+                        {{ admin.prenom?.[0] }}{{ admin.nom?.[0] }}
+                      </div>
+                      <div>
+                        <div class="font-bold text-sm">{{ admin.prenom }} {{ admin.nom }}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="text-xs text-slate-500" dir="ltr">{{ admin.email }}</td>
+                  <td class="text-xs text-slate-400">{{ admin.createdAt | date:'shortDate' }}</td>
+                  <td>
+                    <div class="flex gap-1">
+                      <button type="button" class="table-action-btn table-action-btn-view" (click)="viewDetails(admin)"
+                        title="عرض"><i class="fas fa-eye"></i></button>
+                      <button type="button" class="table-action-btn table-action-btn-edit" (click)="editItem(admin)"
+                        title="تعديل"><i class="fas fa-pen"></i></button>
+                      <button type="button" class="table-action-btn table-action-btn-delete"
+                        (click)="confirmDelete(admin)" [disabled]="loadingDelete()" title="حذف"><i
+                          class="fas fa-trash"></i></button>
+                    </div>
+                  </td>
+                </tr>
+                } @empty {
+                <tr>
+                  <td colspan="4" class="text-center py-10 text-slate-400">{{ searchQuery() ? 'لا توجد نتائج' : 'لا يوجد
+                    مشرفات حالياً' }}</td>
+                </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+</div>
+
+@if (showFormModal()) {
+<div class="modal-overlay">
+  <div class="modal-dialog max-w-2xl fade-in">
+    <div class="modal-header-gradient">
+      <h3 class="modal-title text-white">
+        <i class="fas fa-user-shield ml-3"></i> {{ isEditing() ? 'تعديل بيانات المشرف' : 'إضافة مشرف جديد' }}
+      </h3>
+      <button type="button" class="text-white/70 hover:text-white" (click)="closeFormModal()"><i
+          class="fas fa-times text-xl"></i></button>
+    </div>
+    <div class="modal-body p-8">
+      @if (submitError()) {
+      <div class="badge-danger modern-badge mb-6 w-full justify-center">{{ submitError() }}</div>
+      }
+      <form (ngSubmit)="submitForm(f)" #f="ngForm" class="space-y-10" novalidate>
+        <input type="hidden" name="id" [(ngModel)]="formModel.id">
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+          <div class="space-y-7">
+            <div class="form-section-header mb-4">
+              <i class="fas fa-user"></i>
+              <span>المعلومات الشخصية</span>
+            </div>
+
+            <div class="form-group">
+              <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">الاسم الأول *</label>
+              <div class="input-with-icon"
+                [class.border-red-500]="(prenom.invalid && f.submitted) || formErrors()['prenom']">
+                <i class="fas fa-user text-slate-400"></i>
+                <input type="text" name="prenom" [(ngModel)]="formModel.prenom" #prenom="ngModel" required
+                  placeholder="أدخل الاسم">
+              </div>
+              @if (prenom.invalid && f.submitted) {
+              <p class="text-[10px] text-red-500 mt-1">الاسم مطلوب</p>
+              }
+              @if (!prenom.invalid && formErrors()['prenom']) {
+              <p class="text-[10px] text-red-500 mt-1">{{ formErrors()['prenom'] }}</p>
+              }
+            </div>
+
+            <div class="form-group">
+              <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">اللقب *</label>
+              <div class="input-with-icon" [class.border-red-500]="(nom.invalid && f.submitted) || formErrors()['nom']">
+                <i class="fas fa-user-tag text-slate-400"></i>
+                <input type="text" name="nom" [(ngModel)]="formModel.nom" #nom="ngModel" required
+                  placeholder="أدخل اللقب">
+              </div>
+              @if (nom.invalid && f.submitted) {
+              <p class="text-[10px] text-red-500 mt-1">اللقب مطلوب</p>
+              }
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div class="form-group">
+                <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">الجنس</label>
+                <div class="input-with-icon">
+                  <i class="fas fa-venus-mars text-slate-400"></i>
+                  <select name="gender" [(ngModel)]="formModel.gender">
+                    <option value="">اختر</option>
+                    <option value="HOMME">ذكر</option>
+                    <option value="FEMME">أنثى</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">تاريخ الميلاد</label>
+                <div class="input-with-icon">
+                  <i class="fas fa-calendar-alt text-slate-400"></i>
+                  <input type="date" name="dateNaissance" [(ngModel)]="formModel.dateNaissance">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-7">
+            <div class="form-section-header mb-4">
+              <i class="fas fa-address-card"></i>
+              <span>معلومات الاتصال</span>
+            </div>
+
+            <div class="form-group">
+              <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">البريد الإلكتروني *</label>
+              <div class="input-with-icon"
+                [class.border-red-500]="(email.invalid && f.submitted) || formErrors()['email']">
+                <i class="fas fa-envelope text-slate-400"></i>
+                <input type="email" name="email" [(ngModel)]="formModel.email" #email="ngModel" required email
+                  placeholder="example@email.com">
+              </div>
+              @if (email.errors?.['required'] && f.submitted) {
+              <p class="text-[10px] text-red-500 mt-1">البريد الإلكتروني مطلوب</p>
+              }
+            </div>
+
+            <div class="form-group">
+              <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">رقم الهاتف</label>
+              <div class="input-with-icon">
+                <i class="fas fa-phone text-slate-400"></i>
+                <input type="text" name="telephone" [(ngModel)]="formModel.telephone" placeholder="+212 ...">
+              </div>
+            </div>
+
+            @if (!isEditing()) {
+            <div class="space-y-4">
+              <div class="form-section-header mb-4">
+                <i class="fas fa-lock"></i>
+                <span>الأمان</span>
+              </div>
+              <div class="grid grid-cols-2 gap-4">
+                <div class="form-group">
+                  <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">كلمة المرور</label>
+                  <div class="input-with-icon">
+                    <input type="password" name="password" [(ngModel)]="formModel.password" placeholder="••••••••">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">التأكيد</label>
+                  <div class="input-with-icon">
+                    <input type="password" name="password_confirmation" [(ngModel)]="formModel.password_confirmation"
+                      placeholder="••••••••">
+                  </div>
+                </div>
+              </div>
+            </div>
+            }
+          </div>
+        </div>
+
+        <div class="mt-14 flex justify-end gap-3 pt-8 border-t border-slate-100">
+          <button type="submit" class="btn-modern btn-primary-modern px-10 shadow-lg shadow-accent/20"
+            [disabled]="loadingSubmit()">
+            {{ loadingSubmit() ? 'جاري الحفظ...' : (isEditing() ? 'تحديث البيانات' : 'إضافة المشرف') }}
+          </button>
+          <button type="button" class="btn-modern btn-secondary-modern" (click)="closeFormModal()">إلغاء</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+}
+
+@if (showDetailsModal()) {
+<div class="modal-overlay">
+  <div class="modal-dialog max-w-lg fade-in">
+    <div class="modal-header-gradient flex items-center justify-between p-6">
+      <div class="flex items-center gap-4">
+        <div
+          class="w-14 h-14 rounded-2xl bg-white/20 text-white flex items-center justify-center font-black text-xl shadow-inner">
+          {{ detailsUser()?.prenom?.[0] }}{{ detailsUser()?.nom?.[0] }}
+        </div>
+        <div>
+          <h2 class="text-xl font-bold text-white">{{ detailsUser()?.prenom }} {{ detailsUser()?.nom }}</h2>
+          <span class="modern-badge bg-white/20 text-white text-[10px] uppercase font-bold">{{ detailsUser()?.role ||
+            'مشرف' }}</span>
+        </div>
+      </div>
+      <button (click)="closeDetailsModal()" class="text-white/70 hover:text-white"><i
+          class="fas fa-times text-xl"></i></button>
+    </div>
+    <div class="p-8 bg-white">
+      <div class="grid grid-cols-1 gap-8">
+        <div class="space-y-4">
+          <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50 pb-2">تفاصيل
+            الحساب</h4>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="flex flex-col">
+              <span class="text-[10px] text-slate-500 font-bold mb-1">البريد الإلكتروني</span>
+              <span class="text-sm font-semibold">{{ detailsUser()?.email }}</span>
+            </div>
+            <div class="flex flex-col">
+              <span class="text-[10px] text-slate-500 font-bold mb-1">رقم الهاتف</span>
+              <span class="text-sm font-semibold" dir="ltr">{{ detailsUser()?.telephone || '—' }}</span>
+            </div>
+            <div class="flex flex-col">
+              <span class="text-[10px] text-slate-500 font-bold mb-1">الجنس</span>
+              <span class="text-sm font-semibold">{{ detailsUser()?.gender === 'HOMME' ? 'ذكر' : 'أنثى' }}</span>
+            </div>
+            <div class="flex flex-col">
+              <span class="text-[10px] text-slate-500 font-bold mb-1">تاريخ الميلاد</span>
+              <span class="text-sm font-semibold">{{ detailsUser()?.dateNaissance || 'غير محدد' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-4 flex justify-end">
+          <button class="btn-modern btn-secondary-modern" (click)="closeDetailsModal()">إغلاق</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+}

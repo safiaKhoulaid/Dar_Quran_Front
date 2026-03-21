@@ -1,0 +1,10 @@
+/* Login specific styles are now mostly handled by global auth classes in app.css */
+/* We keep this file for any very specific overrides if needed */
+
+:host {
+  display: block;
+}
+
+.auth-input-wrapper i.cursor-pointer:hover {
+  color: var(--accent);
+}

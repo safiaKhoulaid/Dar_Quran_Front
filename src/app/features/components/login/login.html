@@ -1,0 +1,78 @@
+<div class="auth-page-wrapper fade-in">
+  <div class="auth-card">
+    <div class="auth-header">
+      <div class="auth-logo">
+        <i class="fas fa-book-quran"></i>
+      </div>
+      <h1 class="auth-title">مدرسة القرآن</h1>
+      <p class="auth-subtitle">مرحباً بك مجدداً، سجل الدخول لمتابعة رحلتك التعليمية</p>
+    </div>
+
+    @if (errorMessage()) {
+    <div class="auth-error-badge">
+      <i class="fas fa-exclamation-circle"></i>
+      <span>{{ errorMessage() }}</span>
+    </div>
+    }
+
+    @if (successMessage()) {
+    <div class="auth-success-badge">
+      <i class="fas fa-check-circle"></i>
+      <span>{{ successMessage() }}</span>
+    </div>
+    }
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="auth-form">
+
+      <div class="auth-input-group">
+        <label for="email" class="auth-label">البريد الإلكتروني</label>
+        <div class="auth-input-wrapper">
+          <input type="email" id="email" formControlName="email" class="auth-input" placeholder="name@example.com"
+            [class.border-red-500]="email.invalid && email.touched" />
+          <i class="fas fa-envelope"></i>
+        </div>
+        @if (email.invalid && email.touched) {
+        <span class="text-[10px] text-red-500 mt-1 font-bold">
+          @if (email.errors?.['required']) { <span>البريد الإلكتروني مطلوب</span> }
+          @if (email.errors?.['email']) { <span>يرجى إدخال بريد إلكتروني صحيح</span> }
+        </span>
+        }
+      </div>
+
+      <div class="auth-input-group">
+        <div class="flex justify-between items-center mb-1">
+          <label for="password" class="auth-label m-0">كلمة المرور</label>
+          <a routerLink="/forgot-password" class="auth-link text-[11px]">نسيت كلمة المرور؟</a>
+        </div>
+        <div class="auth-input-wrapper">
+          <input [type]="showPassword() ? 'text' : 'password'" id="password" formControlName="password"
+            class="auth-input" placeholder="أدخل كلمة المرور"
+            [class.border-red-500]="password.invalid && password.touched" />
+          <i (click)="togglePasswordVisibility()" class="fas cursor-pointer" [class.fa-eye]="!showPassword()"
+            [class.fa-eye-slash]="showPassword()"></i>
+        </div>
+        @if (password.invalid && password.touched) {
+        <span class="text-[10px] text-red-500 mt-1 font-bold">
+          @if (password.errors?.['required']) { <span>كلمة المرور مطلوبة</span> }
+          @if (password.errors?.['minlength']) { <span>يجب أن تكون 6 أحرف على الأقل</span> }
+        </span>
+        }
+      </div>
+
+      <button type="submit" class="auth-btn-submit" [disabled]="isLoading() || loginForm.invalid">
+        @if (!isLoading()) {
+        <span>تسجيل الدخول</span>
+        } @else {
+        <span class="flex items-center justify-center gap-2">
+          <i class="fas fa-circle-notch fa-spin"></i>
+          جاري التحميل...
+        </span>
+        }
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      <p>ليس لديك حساب؟ <a routerLink="/signup" class="auth-link">إنشاء حساب جديد</a></p>
+    </div>
+  </div>
+</div>

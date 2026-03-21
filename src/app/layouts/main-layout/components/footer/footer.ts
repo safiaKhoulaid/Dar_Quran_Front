@@ -1,56 +1,53 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-footer',
-  standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [RouterModule],
   templateUrl: './footer.html',
-  styleUrls: ['./footer.css']
+  styleUrls: ['./footer.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FooterComponent {
-  currentYear = new Date().getFullYear();
+  currentYear = 2026;
 
-  onNewsletterSubmit() {
-    console.log('Newsletter subscription submitted');
-  }
+  onNewsletterSubmit() { }
 
   footerSections = [
     {
-      title: 'Programs',
+      title: 'البرامج',
       links: [
-        { label: 'Quran Basics', href: '#' },
-        { label: 'Arabic for Beginners', href: '#' },
-        { label: 'Islamic Studies', href: '#' },
-        { label: 'Tajweed Mastery', href: '#' }
+        { label: 'أساسيات القرآن', href: '#' },
+        { label: 'اللغة العربية للمبتدئين', href: '#' },
+        { label: 'الدراسات الإسلامية', href: '#' },
+        { label: 'إتقان التجويد', href: '#' },
       ]
     },
     {
-      title: 'Resources',
+      title: 'الموارد',
       links: [
-        { label: 'Learning Materials', href: '#' },
-        { label: 'Video Lessons', href: '#' },
-        { label: 'Blog', href: '#' },
-        { label: 'FAQ', href: '#' }
+        { label: 'المواد التعليمية', href: '#' },
+        { label: 'الدروس المرئية', href: '#' },
+        { label: 'المدونة', href: '#' },
+        { label: 'الأسئلة الشائعة', href: '#' },
       ]
     },
     {
-      title: 'Company',
+      title: 'الشركة',
       links: [
-        { label: 'About Us', href: '#' },
-        { label: 'Contact', href: '#' },
-        { label: 'Careers', href: '#' },
-        { label: 'Become a Tutor', href: '#' }
+        { label: 'من نحن', href: '#' },
+        { label: 'اتصل بنا', href: '#' },
+        { label: 'فرص العمل', href: '#' },
+        { label: 'انضم كمعلم', href: '#' },
       ]
     },
     {
-      title: 'Legal',
+      title: 'قانوني',
       links: [
-        { label: 'Privacy Policy', href: '#' },
-        { label: 'Terms of Service', href: '#' },
-        { label: 'Cookie Policy', href: '#' },
-        { label: 'Contact Support', href: '#' }
+        { label: 'سياسة الخصوصية', href: '#' },
+        { label: 'شروط الخدمة', href: '#' },
+        { label: 'سياسة ملفات تعريف الارتباط', href: '#' },
+        { label: 'الدعم', href: '#' },
       ]
     }
   ];

@@ -1,0 +1,698 @@
+<div class="teacher-dashboard" dir="rtl">
+
+  <!-- Mobile Backdrop -->
+  @if (isSidebarOpen()) {
+  <div class="fixed inset-0 bg-black/50 z-[90] show-mobile" (click)="toggleSidebar()"></div>
+  }
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <aside class="tch-sidebar" [class.open]="isSidebarOpen()">
+    <div class="tch-sidebar-top">
+      <!-- Logo -->
+      <div class="tch-logo">
+        <div class="flex items-center">
+          <div class="tch-logo-icon">
+            <svg width="24" height="24" viewBox="0 0 36 36" fill="none">
+              <circle cx="18" cy="18" r="16" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.3)"
+                stroke-width="1.5" />
+              <text x="18" y="23" text-anchor="middle" font-size="13" font-weight="bold" fill="white"
+                font-family="Tajawal">ق</text>
+            </svg>
+          </div>
+          <span class="mr-2">دار القرآن</span>
+        </div>
+        <!-- Close button for mobile -->
+        <button (click)="toggleSidebar()" class="show-mobile p-2 text-white/70">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <!-- Avatar -->
+      <div class="tch-avatar-wrap">
+        <div class="tch-avatar-ring">
+          <div class="tch-avatar">{{ currentUserName[0] }}</div>
+        </div>
+        <div class="tch-avatar-info">
+          <p class="tch-avatar-name">{{ currentUserName }}</p>
+          <span class="tch-role-badge">معلم</span>
+        </div>
+      </div>
+
+      <!-- Nav -->
+      <nav class="tch-nav" aria-label="قائمة لوحة المعلم">
+        <button class="tch-nav-item" [class.active]="selectedTab === 'overview'" (click)="selectTab('overview')">
+          <span class="tch-nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="7" />
+              <rect x="14" y="3" width="7" height="7" />
+              <rect x="14" y="14" width="7" height="7" />
+              <rect x="3" y="14" width="7" height="7" />
+            </svg>
+          </span>
+          <span>نظرة عامة</span>
+        </button>
+        <button class="tch-nav-item" [class.active]="selectedTab === 'courses'" (click)="selectTab('courses')">
+          <span class="tch-nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+            </svg>
+          </span>
+          <span>مقرراتي</span>
+        </button>
+        <button class="tch-nav-item" [class.active]="selectedTab === 'live'" (click)="selectTab('live')">
+          <span class="tch-nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M23 7l-7 5 7 5V7z" />
+              <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+            </svg>
+          </span>
+          <span>البث المباشر</span>
+        </button>
+        <button class="tch-nav-item" [class.active]="selectedTab === 'absences'" (click)="selectTab('absences')">
+          <span class="tch-nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+              <circle cx="8.5" cy="7" r="4" />
+              <line x1="18" y1="8" x2="23" y2="13" />
+              <line x1="23" y1="8" x2="18" y2="13" />
+            </svg>
+          </span>
+          <span>غيابات الطلاب</span>
+        </button>
+        <button class="tch-nav-item" [class.active]="selectedTab === 'grades'" (click)="selectTab('grades')">
+          <span class="tch-nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+              <polyline points="22 4 12 14.01 9 11.01" />
+            </svg>
+          </span>
+          <span>تسجيل النقاط</span>
+        </button>
+      </nav>
+    </div>
+
+    <div class="tch-sidebar-bottom">
+      <button class="tch-logout-btn" (click)="logout()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+          <polyline points="16 17 21 12 16 7" />
+          <line x1="21" y1="12" x2="9" y2="12" />
+        </svg>
+        <span>تسجيل الخروج</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ═══ MAIN CONTENT ═══ -->
+  <main class="tch-main">
+
+    <!-- ╌ OVERVIEW TAB ╌ -->
+    @if (selectedTab === 'overview') {
+    <div class="tch-section fade-in-up">
+      <header class="show-mobile flex justify-between items-center mb-6">
+        <button (click)="toggleSidebar()" class="p-2 text-indigo-600 bg-indigo-50 rounded-lg">
+          <i class="fas fa-bars"></i>
+        </button>
+        <div class="text-sm font-bold text-indigo-900">{{ currentUserName }}</div>
+      </header>
+
+      <div class="tch-section-header">
+        <div>
+          <h1 class="tch-section-title">مرحباً، {{ currentUserName }}</h1>
+          <p class="tch-section-subtitle">إليك ملخص لنشاطاتك التعليمية اليوم.</p>
+        </div>
+      </div>
+
+      <div class="tch-stats-grid">
+        <div class="tch-stat-card">
+          <div class="tch-stat-icon icon-blue"><i class="fas fa-users"></i></div>
+          <div class="tch-stat-info">
+            <p class="tch-stat-num">{{ myClasses().length }}</p>
+            <p class="tch-stat-label">الفصول المسندة</p>
+          </div>
+        </div>
+        <div class="tch-stat-card">
+          <div class="tch-stat-icon icon-purple"><i class="fas fa-book"></i></div>
+          <div class="tch-stat-info">
+            <p class="tch-stat-num">{{ myCourses().length }}</p>
+            <p class="tch-stat-label">المقررات النشطة</p>
+          </div>
+        </div>
+        <div class="tch-stat-card">
+          <div class="tch-stat-icon icon-orange"><i class="fas fa-video"></i></div>
+          <div class="tch-stat-info">
+            <p class="tch-stat-num">{{ myLiveSessions().length }}</p>
+            <p class="tch-stat-label">جلسات البث</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="tch-grid-2-1">
+        <!-- Classes List -->
+        <div class="tch-card">
+          <div class="tch-card-header">
+            <h3><i class="fas fa-chalkboard ml-2"></i> فصولي الدراسية</h3>
+          </div>
+          <div class="tch-card-body">
+            @for (cls of myClasses(); track cls.id) {
+            <div class="tch-list-item">
+              <div class="tch-item-icon">{{ cls.name[0] }}</div>
+              <div class="tch-item-details">
+                <p class="tch-item-name">{{ cls.name }}</p>
+                <p class="tch-item-sub">القسم: {{ cls.section || 'غير محدد' }}</p>
+              </div>
+              <span class="tch-badge" [class.badge-blue]="cls.section === 'HOMME'"
+                [class.badge-pink]="cls.section === 'FEMME'">
+                {{ cls.section === 'HOMME' ? 'رجال' : 'نساء' }}
+              </span>
+            </div>
+            } @empty {
+            <p class="tch-empty-text">لا توجد فصول مسندة حالياً.</p>
+            }
+          </div>
+        </div>
+
+        <!-- Courses List -->
+        <div class="tch-card">
+          <div class="tch-card-header">
+            <h3><i class="fas fa-graduation-cap ml-2"></i> مقرراتي الأساسية</h3>
+          </div>
+          <div class="tch-card-body">
+            @for (course of myCourses(); track course.id) {
+            <div class="tch-course-strip">
+              <span class="tch-course-dot"></span>
+              <p class="tch-course-name">{{ course.title }}</p>
+              <span class="tch-course-level">{{ course.level }}</span>
+            </div>
+            } @empty {
+            <p class="tch-empty-text">لا توجد مقررات مسندة.</p>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+    }
+
+    <!-- ╌ COURSES TAB (Read Only) ╌ -->
+    @if (selectedTab === 'courses') {
+    <div class="tch-section fade-in-up">
+      <header class="show-mobile flex justify-between items-center mb-6">
+        <button (click)="toggleSidebar()" class="p-2 text-indigo-600 bg-indigo-50 rounded-lg">
+          <i class="fas fa-bars"></i>
+        </button>
+        <div class="text-sm font-bold text-indigo-900">مقرراتي</div>
+      </header>
+      <div class="tch-section-header">
+        <h1 class="tch-section-title">إدارة المقررات والمواد</h1>
+      </div>
+
+      <div class="tch-courses-grid">
+        @for (course of myCourses(); track course.id) {
+        <div class="tch-course-card">
+          <div class="tch-course-header">
+            <div class="tch-course-icon">📘</div>
+            <div class="tch-course-main">
+              <h4>{{ course.title }}</h4>
+              <p>{{ course.level }}</p>
+            </div>
+          </div>
+          <div class="tch-course-stats">
+            <div class="tch-c-stat">
+              <span class="c-label">المعامل</span>
+              <span class="c-val">2.0</span>
+            </div>
+            <div class="tch-c-stat">
+              <span class="c-label">الطلاب</span>
+              <span class="c-val">24</span>
+            </div>
+          </div>
+          <div class="tch-course-actions">
+            <button class="tch-btn-outline w-full">عرض التفاصيل والمنهج</button>
+          </div>
+        </div>
+        } @empty {
+        <div class="tch-empty-state">
+          <div class="tch-empty-icon">📚</div>
+          <p>لا توجد مقررات مسندة لك حالياً.</p>
+        </div>
+        }
+      </div>
+    </div>
+    }
+
+    <!-- ╌ LIVE TAB ╌ -->
+    @if (selectedTab === 'live') {
+    <div class="tch-section fade-in-up">
+      <header class="show-mobile flex justify-between items-center mb-6">
+        <button (click)="toggleSidebar()" class="p-2 text-indigo-600 bg-indigo-50 rounded-lg">
+          <i class="fas fa-bars"></i>
+        </button>
+        <div class="text-sm font-bold text-indigo-900">البث المباشر</div>
+      </header>
+      <div class="tch-section-header">
+        <h1 class="tch-section-title">البث المباشر التعليمي</h1>
+        <button class="tch-btn-primary" (click)="openCreateLive()">
+          <i class="fas fa-plus ml-2"></i> إنشاء بث جديد
+        </button>
+      </div>
+
+      @if (liveSuccess()) {
+      <div class="tch-alert alert-success">{{ liveSuccess() }}</div>
+      }
+
+      <!-- ── Studio Mode Section (Sync from SuperAdmin) ── -->
+      @if (selectedSessionForStudio(); as session) {
+      <div class="tch-studio-container fade-in-up">
+
+        <!-- Video Preview Card -->
+        <div class="tch-card tch-studio-video">
+          <div class="tch-studio-header">
+            <h3><i class="fas fa-video ml-2"></i> استوديو البث: {{ session.title }}</h3>
+            <button (click)="closeStudio()" class="tch-studio-close">&times;</button>
+          </div>
+
+          <div class="tch-studio-preview">
+            <video #studioVideo class="tch-preview-video" playsinline muted autoplay></video>
+
+            @if (!isStudioCameraOn() && !isStudioCameraLoading()) {
+            <div class="tch-studio-overlay">
+              <div class="tch-studio-init-btn" (click)="startStudioCamera()">
+                <i class="fas fa-camera text-2xl mb-2"></i>
+                <span>تشغيل الكاميرا والميكروفون</span>
+              </div>
+            </div>
+            }
+
+            @if (isStudioCameraLoading()) {
+            <div class="tch-studio-overlay">
+              <div class="tch-spinner"></div>
+              <span>جاري التحميل...</span>
+            </div>
+            }
+
+            @if (isStudioCameraOn()) {
+            <div class="tch-studio-controls">
+              <button (click)="stopStudioCamera()" class="tch-btn-stop-cam">إيقاف الكاميرا</button>
+              <div class="flex gap-2">
+                @if (session.status === 'SCHEDULED') {
+                <button (click)="startLive(session)" class="tch-btn-go-live">بدء البث الآن</button>
+                } @else if (session.status === 'LIVE') {
+                <button (click)="endLive(session)" class="tch-btn-end-live">إنهاء الجلسة</button>
+                }
+              </div>
+            </div>
+            }
+          </div>
+
+          <div class="tch-studio-footer">
+            <div class="tch-meta-item">
+              <span class="tch-meta-label">مفتاح البث (Stream Key):</span>
+              <code class="tch-meta-value">{{ studioSessionDetails()?.streamKey || session.streamKey }}</code>
+            </div>
+            <div class="tch-meta-item">
+              <span class="tch-meta-label">رابط البث (RTMP):</span>
+              <code class="tch-meta-value">{{ studioSessionDetails()?.rtmpIngestUrl || '—' }}</code>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chat Sidebar -->
+        <div class="tch-card tch-studio-chat">
+          <div class="tch-card-header">
+            <h3><i class="fas fa-comments ml-2"></i> الدردشة التفاعلية</h3>
+          </div>
+          <div class="tch-chat-box">
+            @for (msg of studioComments(); track msg.id) {
+            <div class="tch-chat-msg">
+              <div class="tch-msg-info">
+                <span class="tch-msg-author">{{ msg.authorDisplayName }}</span>
+                <span class="tch-msg-time">{{ msg.createdAt | date:'HH:mm' }}</span>
+              </div>
+              <div class="tch-msg-body">{{ msg.content }}</div>
+            </div>
+            } @empty {
+            <div class="tch-chat-empty">لا توجد تعليقات بعد</div>
+            }
+          </div>
+          <div class="tch-chat-input-wrap">
+            <input type="text" [ngModel]="chatMessage()" (ngModelChange)="chatMessage.set($event)"
+              (keyup.enter)="sendStudioChatMessage()" placeholder="اكتب رسالة للطلاب..." class="tch-chat-input">
+            <button (click)="sendStudioChatMessage()" class="tch-chat-send">
+              <i class="fas fa-paper-plane"></i>
+            </button>
+          </div>
+        </div>
+
+      </div>
+      }
+
+      <div class="tch-card">
+        <div class="tch-table-wrapper">
+          <table class="tch-table">
+            <thead>
+              <tr>
+                <th>عنوان الجلسة</th>
+                <th>موعد البدء</th>
+                <th>الحالة</th>
+                <th>إجراءات</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (s of myLiveSessions(); track s.id) {
+              <tr>
+                <td>
+                  <div class="tch-live-title">
+                    <span class="tch-live-indicator" [class.live]="s.status === 'LIVE'"></span>
+                    {{ s.title }}
+                  </div>
+                </td>
+                <td class="text-sm text-slate-500">{{ s.scheduledStartAt | date:'short' }}</td>
+                <td>
+                  <span class="tch-status-btn status-{{s.status.toLowerCase()}}">{{ statusLabel(s.status) }}</span>
+                </td>
+                <td>
+                  <div class="tch-action-row">
+                    @if (s.status === 'SCHEDULED') {
+                    <button class="tch-btn-start" (click)="startLive(s)">بدء البث</button>
+                    }
+                    @if (s.status === 'LIVE') {
+                    <button class="tch-btn-watch" (click)="goToWatch(s)" title="مشاهدة">
+                      <i class="fas fa-eye ml-1"></i> مشاهدة
+                    </button>
+                    <button class="tch-btn-broadcast" (click)="goToBroadcast(s)" title="إدارة">
+                      <i class="fas fa-video ml-1"></i> إدارة
+                    </button>
+                    <button class="tch-btn-end" (click)="endLive(s)" title="إيقاف">
+                      <i class="fas fa-stop"></i>
+                    </button>
+                    }
+                    @if (s.status === 'ENDED') {
+                    <span class="text-xs text-slate-400">منتهية</span>
+                    }
+                  </div>
+                </td>
+              </tr>
+              } @empty {
+              <tr>
+                <td colspan="4" class="text-center py-10 text-slate-400">
+                  لا توجد جلسات بث مسجلة. قم بإنشاء واحدة الآن.
+                  <br>
+                  <small>(البث دائماً خاص ويخطر طلاب قسمك فقط)</small>
+                </td>
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    }
+
+    <!-- ╌ ABSENCES TAB ╌ -->
+    @if (selectedTab === 'absences') {
+    <div class="tch-section fade-in-up">
+      <header class="show-mobile flex justify-between items-center mb-6">
+        <button (click)="toggleSidebar()" class="p-2 text-indigo-600 bg-indigo-50 rounded-lg">
+          <i class="fas fa-bars"></i>
+        </button>
+        <div class="text-sm font-bold text-indigo-900">الغيابات</div>
+      </header>
+      <div class="tch-section-header">
+        <h1 class="tch-section-title">تسجيل غيابات الطلاب</h1>
+        <button class="tch-btn-primary" (click)="openAbsenceForm()">
+          <i class="fas fa-calendar-check ml-2"></i> تسجيل غياب جديد
+        </button>
+      </div>
+
+      <div class="tch-filter-bar">
+        <div class="tch-field">
+          <label>اختر الفصل</label>
+          <select [ngModel]="selectedAbsenceRoomId()" (ngModelChange)="onAbsenceRoomChange($event)" class="tch-select">
+            <option value="">-- اختر فصلاً --</option>
+            @for (cls of classesForAbsence(); track cls.id) {
+            <option [value]="cls.id">{{ cls.name }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <div class="tch-card mt-4">
+        <div class="tch-table-wrapper">
+          <table class="tch-table">
+            <thead>
+              <tr>
+                <th>الطالب</th>
+                <th>الحصة</th>
+                <th>التاريخ</th>
+                <th>الحالة</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (abs of absencesList(); track abs.id) {
+              <tr>
+                <td><span class="font-bold text-slate-700">{{ abs.studentPrenom }} {{ abs.studentNom }}</span></td>
+                <td>{{ slotDayLabel(abs.dayOfWeek) }} - {{ abs.startTime }}</td>
+                <td class="text-sm text-slate-500">{{ abs.date | date:'shortDate' }}</td>
+                <td>
+                  <span class="tch-status-btn status-{{abs.status.toLowerCase()}}">
+                    {{ absenceStatusLabels[abs.status] || abs.status }}
+                  </span>
+                </td>
+              </tr>
+              } @empty {
+              <tr>
+                <td colspan="4" class="text-center py-10 text-slate-400">اختر فصلاً لعرض سجل الغيابات.</td>
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    }
+
+    <!-- ╌ GRADES TAB ╌ -->
+    @if (selectedTab === 'grades') {
+    <div class="tch-section fade-in-up">
+      <header class="show-mobile flex justify-between items-center mb-6">
+        <button (click)="toggleSidebar()" class="p-2 text-indigo-600 bg-indigo-50 rounded-lg">
+          <i class="fas fa-bars"></i>
+        </button>
+        <div class="text-sm font-bold text-indigo-900">النقاط</div>
+      </header>
+      <div class="tch-section-header">
+        <h1 class="tch-section-title">إدخال نقاط وتقييمات الطلاب</h1>
+        <button class="tch-btn-primary" (click)="openGradeForm()">
+          <i class="fas fa-plus-circle ml-2"></i> إضافة نقطة
+        </button>
+      </div>
+
+      <div class="tch-filter-bar">
+        <div class="tch-field">
+          <label>الفصل الدراسي</label>
+          <select [ngModel]="selectedGradeRoomId()" (ngModelChange)="onGradeRoomChange($event)" class="tch-select">
+            <option value="">-- اختر فصلاً --</option>
+            @for (cls of myClasses(); track cls.id) {
+            <option [value]="cls.id">{{ cls.name }}</option>
+            }
+          </select>
+        </div>
+        <div class="tch-field">
+          <label>المقرر التعليمي</label>
+          <select [ngModel]="selectedGradeCourseId()" (ngModelChange)="onGradeCourseChange($event)" class="tch-select">
+            <option value="">-- اختر مقرراً --</option>
+            @for (c of coursesForGrade(); track c.id) {
+            <option [value]="c.id">{{ c.title }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <div class="tch-card mt-4">
+        <div class="tch-table-wrapper">
+          <table class="tch-table">
+            <thead>
+              <tr>
+                <th>اسم الطالب</th>
+                <th>المقرر</th>
+                <th>النقطة</th>
+                <th>التاريخ</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (g of gradesList(); track g.id) {
+              <tr>
+                <td><span class="font-bold text-slate-700">{{ g.studentName }}</span></td>
+                <td>{{ g.courseTitle }}</td>
+                <td><span class="tch-grade-badge">{{ g.value }}/20</span></td>
+                <td class="text-sm text-slate-500">{{ g.gradeDate | date:'shortDate' }}</td>
+              </tr>
+              } @empty {
+              <tr>
+                <td colspan="4" class="text-center py-10 text-slate-400">اختر الفصل والمقرر لعرض قائمة النقاط.</td>
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    }
+
+  </main>
+
+  <!-- ═══ MODALS ═══ -->
+
+  <!-- Live Stream Modal -->
+  @if (showLiveForm()) {
+  <div class="tch-modal-overlay" (click)="closeLiveForm()">
+    <div class="tch-modal" (click)="$event.stopPropagation()">
+      <div class="tch-modal-header">
+        <h3>إنشاء بث مباشر جديد</h3>
+        <button (click)="closeLiveForm()" class="close-btn">&times;</button>
+      </div>
+      <div class="tch-modal-body">
+        @if (liveError()) { <div class="tch-alert alert-danger">{{ liveError() }}</div> }
+        <div class="tch-form-grid">
+          <div class="tch-field-full">
+            <label class="tch-label">عنوان البث *</label>
+            <input type="text" [(ngModel)]="liveForm.title" placeholder="مثلاً: مراجعة سورة البقرة" class="tch-input">
+          </div>
+          <div class="tch-field-full">
+            <label class="tch-label">وصف الجلسة</label>
+            <textarea [(ngModel)]="liveForm.description" rows="3" class="tch-input"
+              placeholder="اكتب تفاصيل عن محتوى البث..."></textarea>
+          </div>
+          <div class="tch-field">
+            <label class="tch-label">وقت البدء المجدول</label>
+            <input type="datetime-local" [(ngModel)]="liveForm.scheduledStartAt" class="tch-input">
+          </div>
+          <div class="tch-field">
+            <label class="tch-label">الخصوصية</label>
+            <select [(ngModel)]="liveForm.accessType" class="tch-select">
+              <option value="INTERNAL">خاص (طلاب قسمي فقط)</option>
+              <option value="PUBLIC" disabled>عام (متاح للجميع)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Gender-based Informative Notice -->
+        <div class="tch-notice tch-notice-info mt-4">
+          <p><i class="fas fa-info-circle ml-2"></i>
+            سيتم إرسال إشعار فقط للطلاب من <strong>نفس القسم</strong>.
+            البث سيكون <strong>خاصاً</strong> وغير متاح للأقسام الأخرى.
+          </p>
+        </div>
+      </div>
+      <div class="tch-modal-footer">
+        <button class="tch-btn-save" (click)="createLive()" [disabled]="savingLive()">
+          {{ savingLive() ? 'جاري الحفظ...' : 'تأكيد وحجز الموعد' }}
+        </button>
+        <button class="tch-btn-cancel" (click)="closeLiveForm()">إلغاء</button>
+      </div>
+    </div>
+  </div>
+  }
+
+  <!-- Absence Modal -->
+  @if (showAbsenceForm()) {
+  <div class="tch-modal-overlay" (click)="closeAbsenceForm()">
+    <div class="tch-modal" (click)="$event.stopPropagation()">
+      <div class="tch-modal-header">
+        <h3>تسجيل حالة غياب طالب</h3>
+        <button (click)="closeAbsenceForm()" class="close-btn">&times;</button>
+      </div>
+      <div class="tch-modal-body">
+        @if (absenceError()) { <div class="tch-alert alert-danger">{{ absenceError() }}</div> }
+        <div class="tch-form-grid">
+          <div class="tch-field-full">
+            <label class="tch-label">الطالب المستهدف *</label>
+            <select [(ngModel)]="absenceForm.studentId" class="tch-select">
+              <option value="">-- اختر الطالب --</option>
+              @for (st of studentsForAbsence(); track st.id) {
+              <option [value]="st.id">{{ st.prenom }} {{ st.nom }}</option>
+              }
+            </select>
+          </div>
+          <div class="tch-field">
+            <label class="tch-label">الحصة الزمنية *</label>
+            <select [(ngModel)]="absenceForm.scheduleSlotId" class="tch-select">
+              <option value="">-- اختر الحصة --</option>
+              @for (slot of scheduleSlotsForAbsence(); track slot.id) {
+              <option [value]="slot.id">{{ slotDayLabel(slot.dayOfWeek) }} ({{ slot.startTime }} - {{ slot.endTime }})
+              </option>
+              }
+            </select>
+          </div>
+          <div class="tch-field">
+            <label class="tch-label">تاريخ الغياب *</label>
+            <input type="date" [(ngModel)]="absenceForm.date" class="tch-input">
+          </div>
+          <div class="tch-field-full">
+            <label class="tch-label">حالة التبرير</label>
+            <div class="tch-radio-group">
+              <label class="tch-radio"><input type="radio" value="UNJUSTIFIED" [(ngModel)]="absenceForm.status"> غير
+                مبرر</label>
+              <label class="tch-radio"><input type="radio" value="JUSTIFIED" [(ngModel)]="absenceForm.status">
+                مبرر</label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tch-modal-footer">
+        <button class="tch-btn-save" (click)="saveAbsence()" [disabled]="savingAbsence()">حفظ السجل</button>
+        <button class="tch-btn-cancel" (click)="closeAbsenceForm()">إلغاء</button>
+      </div>
+    </div>
+  </div>
+  }
+
+  <!-- Grade Modal -->
+  @if (showGradeForm()) {
+  <div class="tch-modal-overlay" (click)="closeGradeForm()">
+    <div class="tch-modal" (click)="$event.stopPropagation()">
+      <div class="tch-modal-header">
+        <h3>رصد نقطة تقييم جديدة</h3>
+        <button (click)="closeGradeForm()" class="close-btn">&times;</button>
+      </div>
+      <div class="tch-modal-body">
+        @if (gradeError()) { <div class="tch-alert alert-danger">{{ gradeError() }}</div> }
+        <div class="tch-form-grid">
+          <div class="tch-field-full">
+            <label class="tch-label">الطالب *</label>
+            <select [(ngModel)]="gradeForm.studentId" class="tch-select">
+              <option value="">-- اختر الطالب --</option>
+              @for (st of studentsForGrade(); track st.id) {
+              <option [value]="st.id">{{ st.prenom }} {{ st.nom }}</option>
+              }
+            </select>
+          </div>
+          <div class="tch-field-full">
+            <label class="tch-label">المقرر الدراسي *</label>
+            <select [(ngModel)]="gradeForm.courseId" class="tch-select">
+              <option value="">-- اختر المقرر --</option>
+              @for (c of coursesForGrade(); track c.id) {
+              <option [value]="c.id">{{ c.title }}</option>
+              }
+            </select>
+          </div>
+          <div class="tch-field">
+            <label class="tch-label">النقطة المسجلة (من 20)*</label>
+            <input type="number" [(ngModel)]="gradeForm.value" class="tch-input" min="0" max="20" step="0.25">
+          </div>
+          <div class="tch-field">
+            <label class="tch-label">تاريخ الرصد</label>
+            <input type="date" [(ngModel)]="gradeForm.gradeDate" class="tch-input">
+          </div>
+        </div>
+      </div>
+      <div class="tch-modal-footer">
+        <button class="tch-btn-save" (click)="saveGrade()" [disabled]="savingGrade()">تأكيد النقاط</button>
+        <button class="tch-btn-cancel" (click)="closeGradeForm()">إلغاء</button>
+      </div>
+    </div>
+  </div>
+  }
+
+</div>

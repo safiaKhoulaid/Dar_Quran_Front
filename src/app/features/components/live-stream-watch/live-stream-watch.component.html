@@ -1,0 +1,186 @@
+<div class="live-watch-page" dir="rtl">
+  @if (isLoadingSession()) {
+  <div class="full-page-loading">
+    <i class="fas fa-spinner fa-spin fa-3x"></i>
+    <p>جاري تحميل بيانات البث...</p>
+  </div>
+  } @else if (error()) {
+  <div class="live-watch-container">
+    <div class="error-state modern-card">
+      <i class="fas fa-exclamation-circle fa-3x text-error"></i>
+      <h2 class="error-msg">{{ error() }}</h2>
+      <button class="btn btn-outline" routerLink="/live">
+        العودة إلى قائمة البث
+      </button>
+    </div>
+  </div>
+  } @else if (session()) {
+  <div class="live-watch-layout">
+
+    <!-- القسم الرئيسي للفيديو والمعلومات -->
+    <main class="video-section">
+      <div class="video-card modern-card">
+
+        <div class="video-wrapper">
+          <!-- HLS Player -->
+          <video #videoPlayer class="video-element" controls playsinline autoplay
+            poster="assets/images/live-placeholder.jpg"></video>
+
+          @if (session()?.status !== 'LIVE') {
+          <div class="stream-overlay">
+            <div class="overlay-content">
+              @if (session()?.status === 'SCHEDULED') {
+              <i class="far fa-calendar-alt fa-3x mb-3 text-white"></i>
+              <h3>يبدأ البث قريباً</h3>
+              <p>الموعد: {{ session()?.scheduledStartAt | date:'medium' }}</p>
+              } @else if (session()?.status === 'ENDED') {
+              <i class="fas fa-history fa-3x mb-3 text-white"></i>
+              <h3>انتهى البث</h3>
+              <p>نأمل أن تكونوا قد استفدتم.</p>
+              }
+            </div>
+          </div>
+          }
+        </div>
+
+        <div class="video-info">
+          <div class="info-header">
+            <h1 class="session-title">{{ session()?.title }}</h1>
+            <div class="status-badge" [ngClass]="session()?.status?.toLowerCase()">
+              @if (session()?.status === 'LIVE') {
+              <span class="live-dot pulse"></span> مباشر
+              } @else {
+              {{ session()?.status }}
+              }
+            </div>
+          </div>
+
+          <div class="info-meta">
+            <span>
+              <i class="fas fa-user-tie"></i>
+              المعلم: {{ session()?.teacherName }}
+            </span>
+            <span>
+              <i class="fas fa-users"></i>
+              المشاهدون: —
+            </span>
+            <span>
+              <i class="far fa-clock"></i>
+              بدأ: {{ (session()?.startedAt | date:'shortTime') || 'غير محدد' }}
+            </span>
+          </div>
+
+          @if (session()?.description) {
+          <div class="session-description">
+            <p>{{ session()?.description }}</p>
+          </div>
+          }
+        </div>
+      </div>
+    </main>
+
+    <!-- قسم الدردشة -->
+    <aside class="chat-section modern-card">
+      <div class="chat-header">
+        <h3><i class="fas fa-comments"></i> التعليقات والمناقشة</h3>
+        <span class="comment-count">{{ comments()?.length || 0 }}</span>
+      </div>
+
+      <div class="chat-messages" #chatContainer>
+        @if (loadingComments()) {
+        <div class="chat-status"><i class="fas fa-spinner fa-spin"></i> تحديث...</div>
+        }
+
+        @if (commentsError()) {
+        <div class="chat-status error">{{ commentsError() }}</div>
+        }
+
+        @if (!comments() || comments().length === 0) {
+        <div class="empty-chat">
+          <i class="far fa-comment-dots fa-3x mb-3 text-gray"></i>
+          <p>كن أول من يشارك بتعليق!</p>
+        </div>
+        } @else {
+        <div class="message-list">
+          @for (c of comments(); track c.id) {
+          <div class="message-bubble"
+            [class.own-message]="c.authorDisplayName === newCommentAuthor() || c.authorDisplayName === commentAuthor">
+            <div class="msg-header">
+              <span class="msg-author"><i class="fas fa-user-circle"></i> {{ c.authorDisplayName || 'مشارك' }}</span>
+              <span class="msg-time">{{ c.createdAt | date:'HH:mm' }}</span>
+            </div>
+            <div class="msg-content">{{ c.content }}</div>
+          </div>
+          }
+        </div>
+        }
+      </div>
+
+      <div class="chat-input-area">
+        @if (isSendingComment()) {
+        <div class="sending-overlay">
+          <i class="fas fa-spinner fa-spin"></i> جاري الإرسال...
+        </div>
+        }
+        <form (ngSubmit)="sendComment()" class="comment-form">
+          <input type="text" class="modern-input" [ngModel]="newCommentContent()"
+            (ngModelChange)="newCommentContent.set($event)" name="content" placeholder="اكتب تعليقك هنا..." required
+            autocomplete="off">
+          <button type="submit" class="btn-send" [disabled]="!newCommentContent()?.trim() || isSendingComment()">
+            <i class="fas fa-paper-plane"></i>
+          </button>
+        </form>
+      </div>
+    </aside>
+  </div>
+  } @else {
+  <!-- Fallback when no ID provided -->
+  <div class="live-watch-container">
+    <div class="page-title">
+      <h1><i class="fas fa-video text-primary"></i> البث المباشر المتاح</h1>
+      <p>اكتشف وانضم إلى الجلسات والمحاضرات الحية.</p>
+    </div>
+
+    @if (isLoadingList()) {
+    <div class="loading-state">
+      <i class="fas fa-circle-notch fa-spin fa-2x"></i> جاري البحث عن الجلسات...
+    </div>
+    } @else if (listError()) {
+    <div class="modern-alert error">{{ listError() }}</div>
+    } @else if (sessions().length === 0) {
+    <div class="empty-state-banner">
+      <i class="fas fa-broadcast-tower fa-4x text-light-gray mb-4"></i>
+      <h3>لا يوجد بث مباشر في الوقت الحالي</h3>
+      <p>تفضل بزيارة الموقع لاحقاً لمتابعة الدروس المباشرة.</p>
+    </div>
+    } @else {
+    <div class="sessions-grid">
+      @for (s of sessions(); track s.id) {
+      <div class="session-card modern-card">
+        <div class="card-thumb">
+          <img src="assets/images/live-placeholder.jpg" alt="{{s.title}}" class="thumb-img">
+          <div class="status-badge live">
+            @if (s.status === 'LIVE') { <span class="live-dot pulse"></span> }
+            {{ s.status === 'LIVE' ? 'مباشر الآن' : (s.status === 'ENDED' ? 'منتهي' : 'مجدول') }}
+          </div>
+        </div>
+        <div class="card-content">
+          <h3 class="session-card-title">{{ s.title }}</h3>
+          <div class="session-card-meta">
+            <p class="instructor"><i class="fas fa-user-tie"></i> {{ s.teacherName || 'الشيخ' }}</p>
+            <p class="date"><i class="far fa-clock"></i> {{ s.scheduledStartAt | date:'medium' }}</p>
+          </div>
+          <p class="session-desc">{{ s.description || 'جلسة علمية ودرس نافع بإذن الله.' | slice:0:60 }}...</p>
+        </div>
+        <div class="card-actions">
+          <a [routerLink]="['/live', s.id]" class="btn btn-primary btn-block">
+            <i class="fas fa-play"></i> انضم الآن
+          </a>
+        </div>
+      </div>
+      }
+    </div>
+    }
+  </div>
+  }
+</div>

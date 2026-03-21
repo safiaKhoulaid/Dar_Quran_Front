@@ -1,0 +1,739 @@
+<div class="dar-dashboard" dir="rtl">
+  <div class="flex h-screen overflow-hidden">
+    <!-- Mobile Backdrop -->
+    @if (isSidebarOpen()) {
+    <div class="fixed inset-0 bg-black/50 z-[90] show-mobile" (click)="toggleSidebar()"></div>
+    }
+
+    <!-- Sidebar Modernized -->
+    <aside class="sidebar" [class.open]="isSidebarOpen()">
+      <div class="sidebar-inner">
+        <div class="sidebar-logo">
+          <div class="flex items-center">
+            <i class="fas fa-mosque text-2xl text-primary text-amber-400 ml-2"></i>
+            <span>دار القرآن</span>
+          </div>
+          <!-- Close button for mobile -->
+          <button (click)="toggleSidebar()" class="show-mobile p-2 text-white/70">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div class="sidebar-user">
+          <div class="avatar-primary">{{ currentUserName.slice(0, 2) }}</div>
+          <div class="mr-3">
+            <p class="user-name">{{ currentUserName }}</p>
+            <p class="user-role">{{ isSuperAdmin ? 'المشرف الرئيسي' : 'مشرف النظام' }}</p>
+          </div>
+        </div>
+
+        <nav class="sidebar-nav">
+          <a href="#" class="sidebar-link" [class.active]="selectedTab === 'dashboard'"
+            (click)="selectTab('dashboard'); $event.preventDefault()">
+            <i class="fas fa-th-large"></i>
+            لوحة التحكم
+          </a>
+
+          @if (isSuperAdmin) {
+          <a href="#" class="sidebar-link" [class.active]="selectedTab === 'admins'"
+            (click)="selectTab('admins'); $event.preventDefault()">
+            <i class="fas fa-user-shield"></i>
+            إدارة المشرفين
+          </a>
+          }
+
+          <a href="#" class="sidebar-link" [class.active]="selectedTab === 'teachers'"
+            (click)="selectTab('teachers'); $event.preventDefault()">
+            <i class="fas fa-chalkboard-teacher"></i>
+            المعلمين
+          </a>
+
+          <a href="#" class="sidebar-link" [class.active]="selectedTab === 'students'"
+            (click)="selectTab('students'); $event.preventDefault()">
+            <i class="fas fa-user-graduate"></i>
+            الطلاب
+          </a>
+
+          <a href="#" class="sidebar-link" [class.active]="selectedTab === 'classes'"
+            (click)="selectTab('classes'); $event.preventDefault()">
+            <i class="fas fa-book-open"></i>
+            الفصول الدراسية
+          </a>
+
+          <a href="#" class="sidebar-link" [class.active]="selectedTab === 'schedule'"
+            (click)="selectTab('schedule'); $event.preventDefault()">
+            <i class="fas fa-calendar-alt"></i>
+            الجدول الزمني
+          </a>
+
+          <a href="#" class="sidebar-link" [class.active]="selectedTab === 'courses'"
+            (click)="selectTab('courses'); $event.preventDefault()">
+            <i class="fas fa-book"></i>
+            المقررات
+          </a>
+
+          <a href="#" class="sidebar-link" [class.active]="selectedTab === 'live-stream'"
+            (click)="selectTab('live-stream'); $event.preventDefault()">
+            <i class="fas fa-broadcast-tower"></i>
+            البث المباشر
+          </a>
+        </nav>
+      </div>
+
+      <div class="sidebar-footer">
+        <a href="#" class="logout-link" (click)="logout(); $event.preventDefault()">
+          <i class="fas fa-sign-out-alt ml-3"></i>
+          <span>تسجيل الخروج</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content islamic-pattern">
+
+      <header class="flex justify-between items-center mb-10 relative z-10">
+        <div class="flex items-center gap-4">
+          <!-- Hamburger Menu for mobile -->
+          <button (click)="toggleSidebar()" class="show-mobile p-2 text-primary bg-slate-100 rounded-lg">
+            <i class="fas fa-bars"></i>
+          </button>
+          <div class="search-bar relative hide-mobile">
+            <!-- No logic for search yet, just UI -->
+          </div>
+        </div>
+        <div class="badge-info modern-badge">
+          <i class="far fa-bell ml-1"></i> 3 تنبيهات
+        </div>
+        <div class="text-sm font-semibold text-primary">
+          {{ currentUserName }}
+        </div>
+  </div>
+  </header>
+
+  <!-- Dashboard Tab -->
+  <div class="tab-content fade-in" [class.active]="selectedTab === 'dashboard'">
+    <div class="page-header">
+      <h1 class="page-title">نظرة عامة</h1>
+    </div>
+
+    <!-- Overview Cards -->
+    <div class="stats-grid">
+      <div class="modern-card stat-card">
+        <div class="stat-icon icon-blue">
+          <i class="fas fa-user-graduate"></i>
+        </div>
+        <div class="stat-info">
+          <h3>إجمالي الطلاب</h3>
+          <p class="stat-value">{{ totalStudents() }}</p>
+          <div class="stat-footer">
+            <span class="text-blue-600">ذكور: {{ totalMaleStudents() }}</span>
+            <span class="text-pink-600">إناث: {{ totalFemaleStudents() }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="modern-card stat-card">
+        <div class="stat-icon icon-green">
+          <i class="fas fa-chalkboard-teacher"></i>
+        </div>
+        <div class="stat-info">
+          <h3>المعلمين</h3>
+          <p class="stat-value">{{ totalTeachers() }}</p>
+          <div class="stat-footer">
+            <span class="text-blue-600">ذكور: {{ totalMaleTeachers() }}</span>
+            <span class="text-pink-600">إناث: {{ totalFemaleTeachers() }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="modern-card stat-card">
+        <div class="stat-icon icon-yellow">
+          <i class="fas fa-school"></i>
+        </div>
+        <div class="stat-info">
+          <h3>الفصول الدراسية</h3>
+          <p class="stat-value">{{ totalClasses() }}</p>
+          <div class="stat-footer">
+            <span class="text-blue-600">ذكور: {{ totalClassesMale() }}</span>
+            <span class="text-pink-600">إناث: {{ totalClassesFemale() }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Age Distribution -->
+    <div class="modern-card section-card">
+      <div class="section-header">
+        <h2><i class="fas fa-chart-pie ml-2 text-accent"></i> توزيع الطلاب حسب الفئة العمرية</h2>
+      </div>
+      <div class="p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+          <div>
+            <h4 class="text-sm font-bold text-blue-600 mb-6 uppercase tracking-wider">الطلاب الذكور</h4>
+            <div class="space-y-6">
+              @for (item of maleStudentsByAge(); track item.key) {
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs font-bold text-gray-700">{{ item.label }}</span>
+                  <span class="badge-info modern-badge">{{ item.count }}</span>
+                </div>
+                <div class="w-full bg-slate-100 rounded-full h-2">
+                  <div class="bg-blue-500 h-2 rounded-full transition-all duration-1000" [style.width.%]="item.percent">
+                  </div>
+                </div>
+              </div>
+              }
+            </div>
+          </div>
+
+          <div>
+            <h4 class="text-sm font-bold text-pink-600 mb-6 uppercase tracking-wider">الطالبات الإناث</h4>
+            <div class="space-y-6">
+              @for (item of femaleStudentsByAge(); track item.key) {
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs font-bold text-gray-700">{{ item.label }}</span>
+                  <span class="badge-warning modern-badge" style="background:#fdf2f8; color:#db2777;">{{ item.count
+                    }}</span>
+                </div>
+                <div class="w-full bg-slate-100 rounded-full h-2">
+                  <div class="bg-pink-500 h-2 rounded-full transition-all duration-1000" [style.width.%]="item.percent">
+                  </div>
+                </div>
+              </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Matières / المقررات (Courses) Tab -->
+  <div class="tab-content fade-in" [class.active]="selectedTab === 'courses'">
+    <div class="page-header">
+      <h1 class="page-title">المقررات الدراسية</h1>
+      <button type="button" class="btn-modern btn-primary-modern" (click)="openCourseForm()">
+        <i class="fas fa-plus"></i>
+        <span>إضافة مقرر</span>
+      </button>
+    </div>
+
+    <div class="modern-card mb-8">
+      @if (coursesError()) {
+      <div class="p-4 text-red-600 text-sm">{{ coursesError() }}</div>
+      }
+      <div class="p-4 border-b border-slate-100 flex items-center justify-between">
+        <span class="text-sm font-bold text-slate-600">قائمة المقررات</span>
+        <button type="button" class="btn-modern btn-secondary-modern py-1" (click)="loadCoursesList()">
+          <i class="fas fa-sync-alt"></i>
+        </button>
+      </div>
+      <div class="modern-table-wrapper">
+        <table class="modern-table">
+          <thead>
+            <tr>
+              <th>العنوان</th>
+              <th>المستوى</th>
+              <th>الحالة</th>
+              <th>الظهور</th>
+              <th>عدد الدروس</th>
+              <th>الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (c of coursesList(); track c.id) {
+            <tr>
+              <td class="font-bold">{{ c.title }}</td>
+              <td>{{ courseLevelLabel(c.level) }}</td>
+              <td>
+                <span class="modern-badge" [class.badge-info]="c.status === 'DRAFT'"
+                  [class.badge-success]="c.status === 'PUBLISHED'" [class.badge-warning]="c.status === 'ARCHIVED'">
+                  {{ courseStatusLabel(c.status) }}
+                </span>
+              </td>
+              <td>{{ c.isPublic ? 'عام' : 'خاص' }}</td>
+              <td>{{ c.numberOfLessons ?? 0 }}</td>
+              <td class="flex gap-2">
+                <button type="button" class="btn-modern btn-secondary-modern py-1 px-2 text-indigo-600"
+                  (click)="openEditCourseForm(c)" title="تعديل">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button type="button" class="btn-modern btn-secondary-modern py-1 px-2 text-red-600"
+                  (click)="deleteCourse(c)" title="حذف">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </td>
+            </tr>
+            }
+            @if (coursesList().length === 0 && !coursesLoading()) {
+            <tr>
+              <td colspan="6" class="text-center py-10 text-slate-400">لا توجد مقررات. أضف مقرراً جديداً.</td>
+            </tr>
+            }
+            @if (coursesLoading()) {
+            <tr>
+              <td colspan="6" class="text-center py-10 text-slate-400"><i class="fas fa-spinner fa-spin"></i> جاري
+                التحميل...</td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Modal: إضافة / تعديل مقرر -->
+    @if (showCourseForm()) {
+    <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" (click)="closeCourseForm()">
+      <div class="modern-card max-w-lg w-full shadow-xl max-h-[90vh] overflow-y-auto"
+        (click)="$event.stopPropagation()">
+        <div class="p-6 border-b border-slate-100">
+          <h2 class="text-lg font-bold">{{ editingCourse() ? 'تعديل المقرر' : 'إضافة مقرر' }}</h2>
+        </div>
+        <div class="p-6 space-y-4">
+          <div class="form-group">
+            <label class="text-xs font-bold text-slate-500 uppercase">العنوان *</label>
+            <input type="text" class="input-with-icon w-full" [(ngModel)]="courseForm.title" name="courseTitle"
+              placeholder="مثال: تجويد القرآن" minlength="3" />
+          </div>
+          <div class="form-group">
+            <label class="text-xs font-bold text-slate-500 uppercase">الوصف</label>
+            <textarea class="input-with-icon w-full min-h-[80px]" [(ngModel)]="courseForm.description"
+              name="courseDescription" placeholder="وصف مختصر للمقرر"></textarea>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="form-group">
+              <label class="text-xs font-bold text-slate-500 uppercase">المستوى</label>
+              <select class="input-with-icon w-full" [(ngModel)]="courseForm.level" name="courseLevel">
+                <option value="BEGINNER">مبتدئ</option>
+                <option value="INTERMEDIATE">متوسط</option>
+                <option value="ADVANCED">متقدم</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="text-xs font-bold text-slate-500 uppercase">الحالة</label>
+              <select class="input-with-icon w-full" [(ngModel)]="courseForm.status" name="courseStatus">
+                <option value="DRAFT">مسودة</option>
+                <option value="PUBLISHED">منشور</option>
+                <option value="ARCHIVED">أرشيف</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group flex items-center gap-2">
+            <input type="checkbox" id="courseIsPublic" [(ngModel)]="courseForm.isPublic" name="courseIsPublic" />
+            <label for="courseIsPublic" class="text-sm font-medium">مقرر عام (ظاهر للجميع)</label>
+          </div>
+          @if (coursesError()) {
+          <p class="text-sm text-red-600">{{ coursesError() }}</p>
+          }
+          <div class="flex gap-3 pt-2">
+            <button type="button" class="btn-modern btn-primary-modern flex-1" (click)="saveCourse()"
+              [disabled]="courseSaving()">
+              {{ courseSaving() ? 'جاري الحفظ...' : (editingCourse() ? 'تحديث' : 'حفظ') }}
+            </button>
+            <button type="button" class="btn-modern btn-secondary-modern" (click)="closeCourseForm()">إلغاء</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    }
+  </div>
+
+  <!-- Emploi du temps (Schedule) Tab -->
+  <div class="tab-content fade-in" [class.active]="selectedTab === 'schedule'">
+    <div class="page-header">
+      <h1 class="page-title">الجدول الزمني</h1>
+      <button type="button" class="btn-modern btn-primary-modern" (click)="openScheduleForm()">
+        <i class="fas fa-plus"></i>
+        <span>إضافة حصة</span>
+      </button>
+    </div>
+
+    <div class="modern-card mb-8">
+      <div class="p-4 border-b border-slate-100 flex items-center gap-4">
+        <span class="text-sm font-bold text-slate-600">الفصل:</span>
+        <select class="btn-modern btn-secondary-modern py-1 min-w-[200px]" [ngModel]="selectedScheduleRoomId()"
+          (ngModelChange)="onScheduleRoomChange($event)">
+          <option value="">كل الفصول</option>
+          @for (r of scheduleRooms(); track r.id) {
+          <option [value]="r.id">{{ r.name }}</option>
+          }
+        </select>
+        <button type="button" class="btn-modern btn-secondary-modern py-1" (click)="loadScheduleSlots()">
+          <i class="fas fa-sync-alt"></i>
+        </button>
+      </div>
+
+      @if (scheduleError()) {
+      <div class="p-4 text-red-600 text-sm">{{ scheduleError() }}</div>
+      }
+
+      <div class="modern-table-wrapper">
+        <table class="modern-table">
+          <thead>
+            <tr>
+              <th>اليوم</th>
+              <th>البداية</th>
+              <th>النهاية</th>
+              <th>المادة</th>
+              <th>الأستاذ</th>
+              <th>القاعة</th>
+              <th>الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (slot of scheduleSlots(); track slot.id) {
+            <tr>
+              <td>{{ scheduleDayLabel(slot.dayOfWeek) }}</td>
+              <td>{{ slot.startTime }}</td>
+              <td>{{ slot.endTime }}</td>
+              <td>{{ slot.courseTitle }}</td>
+              <td>{{ slot.teacherName }}</td>
+              <td>{{ slot.roomName }}</td>
+              <td>
+                <button type="button" class="btn-modern btn-secondary-modern py-1 px-2 text-red-600"
+                  (click)="deleteScheduleSlot(slot)" title="حذف">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </td>
+            </tr>
+            }
+            @if (scheduleSlots().length === 0 && !scheduleLoading()) {
+            <tr>
+              <td colspan="7" class="text-center py-10 text-slate-400">لا توجد حصص. اختر فصلاً أو أضف حصة جديدة.
+              </td>
+            </tr>
+            }
+            @if (scheduleLoading()) {
+            <tr>
+              <td colspan="7" class="text-center py-10 text-slate-400"><i class="fas fa-spinner fa-spin"></i> جاري
+                التحميل...</td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Modal: Ajouter une حصة -->
+    @if (showScheduleForm()) {
+    <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" (click)="closeScheduleForm()">
+      <div class="modern-card max-w-lg w-full shadow-xl" (click)="$event.stopPropagation()">
+        <div class="p-6 border-b border-slate-100">
+          <h2 class="text-lg font-bold">إضافة حصة</h2>
+        </div>
+        <div class="p-6 space-y-4">
+          <div class="form-group">
+            <label class="text-xs font-bold text-slate-500 uppercase">اليوم</label>
+            <select class="input-with-icon w-full" [(ngModel)]="scheduleForm.dayOfWeek" name="scheduleDay">
+              @for (d of [1,2,3,4,5,6,7]; track d) {
+              <option [value]="d">{{ dayOfWeekLabels[d] }}</option>
+              }
+            </select>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="form-group">
+              <label class="text-xs font-bold text-slate-500 uppercase">وقت البدء</label>
+              <input type="time" class="input-with-icon w-full" [(ngModel)]="scheduleForm.startTime" name="startTime" />
+            </div>
+            <div class="form-group">
+              <label class="text-xs font-bold text-slate-500 uppercase">وقت النهاية</label>
+              <input type="time" class="input-with-icon w-full" [(ngModel)]="scheduleForm.endTime" name="endTime" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="text-xs font-bold text-slate-500 uppercase">القاعة / الفصل</label>
+            <select class="input-with-icon w-full" [(ngModel)]="scheduleForm.roomId" name="scheduleRoomId" required>
+              <option value="">— اختر —</option>
+              @for (r of scheduleRooms(); track r.id) {
+              <option [value]="r.id">{{ r.name }}</option>
+              }
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="text-xs font-bold text-slate-500 uppercase">المادة</label>
+            <select class="input-with-icon w-full" [(ngModel)]="scheduleForm.courseId" name="scheduleCourseId" required>
+              <option value="">— اختر —</option>
+              @for (c of scheduleCourses(); track c.id) {
+              <option [value]="c.id">{{ c.title }}</option>
+              }
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="text-xs font-bold text-slate-500 uppercase">الأستاذ</label>
+            <select class="input-with-icon w-full" [(ngModel)]="scheduleForm.teacherId" name="scheduleTeacherId"
+              required>
+              <option value="">— اختر —</option>
+              @for (t of scheduleTeachers(); track t.id) {
+              <option [value]="t.id">{{ t.prenom }} {{ t.nom }}</option>
+              }
+            </select>
+          </div>
+          @if (scheduleError()) {
+          <p class="text-sm text-red-600">{{ scheduleError() }}</p>
+          }
+          <div class="flex gap-3 pt-2">
+            <button type="button" class="btn-modern btn-primary-modern flex-1" (click)="saveScheduleSlot()"
+              [disabled]="scheduleSaving()">
+              {{ scheduleSaving() ? 'جاري الحفظ...' : 'حفظ' }}
+            </button>
+            <button type="button" class="btn-modern btn-secondary-modern" (click)="closeScheduleForm()">إلغاء</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    }
+  </div>
+
+  <!-- Live Stream Tab Modernized -->
+  <div class="tab-content fade-in" [class.active]="selectedTab === 'live-stream'">
+    <div class="page-header">
+      <h1 class="page-title">البث المباشر</h1>
+      <div class="flex gap-3">
+        <button type="button" class="btn-modern btn-primary-modern" (click)="openCreateLive()">
+          <i class="fas fa-plus"></i>
+          <span>إنشاء جلسة</span>
+        </button>
+        <button type="button" class="btn-modern btn-secondary-modern" (click)="startLivestream()">
+          <i class="fas fa-external-link-alt"></i>
+          <span>مشاهدة كزائر</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="modern-card mb-8">
+      <div class="p-4 border-b border-slate-100 flex items-center justify-between">
+        <div class="flex items-center gap-4">
+          <span class="text-sm font-bold text-slate-600">تصفية:</span>
+          <select class="btn-modern btn-secondary-modern py-1" [(ngModel)]="liveFilterStatus"
+            (ngModelChange)="loadLiveSessions()">
+            <option value="">الكل</option>
+            <option value="SCHEDULED">مجدولة</option>
+            <option value="LIVE">مباشر</option>
+            <option value="ENDED">منتهية</option>
+          </select>
+        </div>
+        <button type="button" class="btn-modern btn-secondary-modern py-1" (click)="loadLiveSessions()">
+          <i class="fas fa-sync-alt"></i>
+        </button>
+      </div>
+
+      <div class="modern-table-wrapper">
+        <table class="modern-table">
+          <thead>
+            <tr>
+              <th>العنوان</th>
+              <th>الحالة</th>
+              <th>مفتاح البث</th>
+              <th>الموعد</th>
+              <th>المعلم</th>
+              <th>الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (s of liveSessions(); track s.id) {
+            <tr>
+              <td class="font-bold">{{ s.title }}</td>
+              <td>
+                <span class="modern-badge" [class.badge-success]="s.status === 'LIVE'"
+                  [class.badge-warning]="s.status === 'SCHEDULED'" [class.badge-info]="s.status === 'ENDED'">
+                  {{ statusLabel(s.status) }}
+                </span>
+              </td>
+              <td class="font-mono text-xs">{{ s.streamKey }}</td>
+              <td>{{ s.scheduledStartAt | date:'short' }}</td>
+              <td>{{ s.teacherName || '—' }}</td>
+              <td class="flex gap-2">
+                <button (click)="goToWatch(s)" class="btn-modern btn-secondary-modern py-1 px-2" title="مشاهدة"><i
+                    class="fas fa-eye"></i></button>
+                <button (click)="goToBroadcast(s)" class="btn-modern btn-secondary-modern py-1 px-2 text-blue-600"
+                  title="بث من المتصفح"><i class="fas fa-video"></i></button>
+                @if (s.status === 'SCHEDULED') {
+                <button (click)="startLive(s)" class="btn-modern btn-secondary-modern py-1 px-2 text-success"
+                  title="بدء"><i class="fas fa-play"></i></button>
+                } @else if (s.status === 'LIVE') {
+                <button (click)="endLive(s)" class="btn-modern btn-secondary-modern py-1 px-2 text-danger"
+                  title="إيقاف"><i class="fas fa-stop"></i></button>
+                }
+                <button (click)="openEditLive(s)" class="btn-modern btn-secondary-modern py-1 px-2 text-indigo-600"
+                  title="تعديل"><i class="fas fa-edit"></i></button>
+                <button (click)="deleteLive(s)" class="btn-modern btn-secondary-modern py-1 px-2 text-red-600"
+                  title="حذف"><i class="fas fa-trash"></i></button>
+              </td>
+            </tr>
+            }
+            @if (liveSessions().length === 0 && !loadingLive()) {
+            <tr>
+              <td colspan="6" class="text-center py-10 text-slate-400">لا توجد جلسات حالياً.</td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    @if (selectedSessionForStudio(); as studioSession) {
+    <div class="studio-container fade-in">
+      <div class="modern-card studio-video-card">
+        <div class="p-4 border-b border-white/10 flex justify-between items-center text-white">
+          <h2 class="font-bold">استوديو البث: {{ studioSession.title }}</h2>
+          <button (click)="closeStudio()" class="bg-white/10 hover:bg-white/20 p-2 rounded-full"><i
+              class="fas fa-times"></i></button>
+        </div>
+        <div class="aspect-video relative bg-slate-900">
+          <video #studioVideo class="w-full h-full object-cover" playsinline muted autoplay></video>
+
+          @if (!isStudioCameraOn() && !isStudioCameraLoading()) {
+          <div class="absolute inset-0 flex flex-col items-center justify-center bg-slate-900/80 text-white gap-4">
+            <div class="p-6 bg-white/5 rounded-full"><i class="fas fa-video-slash text-4xl"></i></div>
+            <button (click)="startStudioCamera()" class="btn-modern btn-primary-modern">تشغيل الكاميرا
+              والميكروفون</button>
+          </div>
+          }
+
+          @if (isStudioCameraLoading()) {
+          <div class="absolute inset-0 flex items-center justify-center bg-slate-900/80 text-white gap-2">
+            <i class="fas fa-spinner fa-spin"></i> جاري التحميل...
+          </div>
+          }
+
+          @if (isStudioCameraOn()) {
+          <div class="absolute bottom-4 left-4 right-4 flex justify-between">
+            <button (click)="stopStudioCamera()" class="btn-modern btn-secondary-modern bg-white/90">إيقاف
+              الكاميرا</button>
+            <div class="flex gap-2">
+              @if (studioSession.status === 'SCHEDULED') {
+              <button (click)="startLive(studioSession)"
+                class="btn-modern btn-primary-modern bg-success hover:bg-emerald-600">بدء البث المباشر</button>
+              } @else {
+              <button (click)="endLive(studioSession)"
+                class="btn-modern btn-primary-modern bg-danger hover:bg-red-600">إنهاء البث</button>
+              }
+            </div>
+          </div>
+          }
+        </div>
+
+        <div class="p-4 bg-slate-800 text-slate-300 text-sm">
+          <div class="flex gap-8 mb-3">
+            <span><i class="fas fa-link ml-2"></i> RTMP: {{ studioSessionDetails()?.rtmpIngestUrl || '—' }}</span>
+            <span><i class="fas fa-key ml-2"></i> Key: {{ studioSessionDetails()?.streamKey }}</span>
+          </div>
+          <a [routerLink]="['/live', studioSession.id]" target="_blank" class="text-accent hover:underline">رابط
+            البث للطلاب <i class="fas fa-external-link-alt text-xs mr-1"></i></a>
+        </div>
+      </div>
+
+      <!-- Sidebar Chat Modernized -->
+      <div class="modern-card flex flex-col h-[500px]">
+        <div class="padding-4 border-b border-slate-100 p-4 font-bold flex justify-between">
+          <span>الدردشة الحية</span>
+          <span class="modern-badge badge-info">{{ studioComments().length }}</span>
+        </div>
+        <div class="flex-1 overflow-y-auto p-4 space-y-4">
+          @for (msg of studioComments(); track msg.id) {
+          <div class="fade-in">
+            <div class="flex justify-between items-center mb-1">
+              <span class="text-xs font-bold text-accent">{{ msg.authorDisplayName }}</span>
+              <span class="text-[10px] text-slate-400">{{ msg.createdAt | date:'HH:mm' }}</span>
+            </div>
+            <p class="text-sm bg-slate-50 p-2 rounded-lg border border-slate-100">{{ msg.content }}</p>
+          </div>
+          }
+          @if (studioComments().length === 0) {
+          <div class="h-full flex items-center justify-center text-slate-400 text-sm">لا تعليقات بعد</div>
+          }
+        </div>
+        <div class="p-4 border-t border-slate-100">
+          <div class="relative">
+            <input type="text" [(ngModel)]="chatMessage" class="input-with-icon w-full p-2 border rounded-full text-sm"
+              placeholder="اكتب ردك..." (keyup.enter)="sendStudioChatMessage()">
+            <button (click)="sendStudioChatMessage()"
+              class="absolute left-2 top-1/2 -translate-y-1/2 text-accent p-2"><i
+                class="fas fa-paper-plane"></i></button>
+          </div>
+        </div>
+      </div>
+    </div>
+    }
+  </div>
+
+  <!-- Other components as reusable sections -->
+  <div class="tab-content fade-in" [class.active]="selectedTab === 'admins'">
+    <app-admin-management></app-admin-management>
+  </div>
+  <div class="tab-content fade-in" [class.active]="selectedTab === 'teachers'">
+    <app-teacher-management></app-teacher-management>
+  </div>
+  <div class="tab-content fade-in" [class.active]="selectedTab === 'students'">
+    <app-student-management></app-student-management>
+  </div>
+  <div class="tab-content fade-in" [class.active]="selectedTab === 'classes'">
+    <app-class-management></app-class-management>
+  </div>
+
+  @if (showLiveForm()) {
+  <div class="modal-overlay" (click)="closeLiveForm()">
+    <div class="modal-dialog max-w-lg fade-in" (click)="$event.stopPropagation()">
+      <div class="modal-header-gradient">
+        <h3 class="modal-title font-Tajawal text-white">{{ editingLiveSession() ? 'تعديل الجلسة' : 'إنشاء جلسة
+          جديدة'
+          }}</h3>
+        <button (click)="closeLiveForm()" class="text-white opacity-70 hover:opacity-100"><i
+            class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <form (ngSubmit)="saveLiveSession()" class="space-y-5">
+          <div class="form-group">
+            <label class="text-xs font-bold text-slate-500 uppercase">عنوان البث *</label>
+            <div class="input-with-icon">
+              <i class="fas fa-heading text-slate-400"></i>
+              <input type="text" [(ngModel)]="liveForm.title" name="title" required
+                placeholder="مثال: محاضرة تجويد القرآن">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="text-xs font-bold text-slate-500 uppercase">مفتاح البث (Stream Key) *</label>
+            <div class="input-with-icon">
+              <i class="fas fa-key text-slate-400"></i>
+              <input type="text" [(ngModel)]="liveForm.streamKey" name="streamKey" required placeholder="stream-123">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div class="form-group">
+              <label class="text-xs font-bold text-slate-500 uppercase">وقت البدء</label>
+              <div class="input-with-icon">
+                <i class="far fa-calendar-alt text-slate-400"></i>
+                <input type="datetime-local" [(ngModel)]="liveForm.scheduledStartAt" name="scheduledStartAt" required>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="text-xs font-bold text-slate-500 uppercase">نوع الوصول</label>
+              <div class="input-with-icon">
+                <i class="fas fa-lock text-slate-400"></i>
+                <select [(ngModel)]="liveForm.accessType" name="accessType">
+                  <option value="EXTERNAL">عام</option>
+                  <option value="INTERNAL">داخلي</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex gap-3 pt-4">
+            <button type="submit" class="btn-modern btn-primary-modern flex-1 shadow-md shadow-accent/20"
+              [disabled]="savingLive()">
+              {{ savingLive() ? 'جاري الحفظ...' : (editingLiveSession() ? 'تحديث الجلسة' : 'إنشاء الجلسة') }}
+            </button>
+            <button type="button" class="btn-modern btn-secondary-modern" (click)="closeLiveForm()">إلغاء</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  }
+
+  </main>
+</div>
+</div>

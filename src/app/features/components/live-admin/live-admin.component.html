@@ -1,0 +1,97 @@
+<div class="live-admin-page" dir="rtl">
+  <div class="live-admin-container">
+    <h1 class="title">إدارة جلسات البث المباشر</h1>
+
+    <div class="toolbar">
+      <label>
+        حالة الجلسات:
+        <select
+          class="input"
+          [value]="selectedStatus"
+          (change)="changeStatusFilter($any($event.target).value)"
+        >
+          <option value="ALL">الكل</option>
+          <option value="SCHEDULED">مجدول</option>
+          <option value="LIVE">مباشر</option>
+          <option value="ENDED">منتهي</option>
+          <option value="CANCELLED">ملغى</option>
+        </select>
+      </label>
+
+      <button class="btn" type="button" (click)="loadSessions()">
+        تحديث القائمة
+      </button>
+    </div>
+
+    <div *ngIf="loading" class="hint">جاري تحميل الجلسات...</div>
+    <div *ngIf="error" class="alert alert-error">{{ error }}</div>
+
+    <table *ngIf="!loading && sessions.length" class="table">
+      <thead>
+        <tr>
+          <th>العنوان</th>
+          <th>الحالة</th>
+          <th>مفتاح البث</th>
+          <th>بداية مجدولة</th>
+          <th>إجراءات</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let s of sessions; trackBy: trackById">
+          <td>
+            <div class="cell-main">
+              <div class="title-cell">{{ s.title }}</div>
+              <div class="sub">
+                <span>ID: {{ s.id }}</span>
+              </div>
+            </div>
+          </td>
+          <td>
+            <span class="badge" [class.badge-live]="s.status === 'LIVE'">
+              {{ s.status }}
+            </span>
+          </td>
+          <td>{{ s.streamKey }}</td>
+          <td>{{ s.scheduledStartAt | date: 'short' }}</td>
+          <td>
+            <div class="actions">
+              <button
+                type="button"
+                class="btn btn-small"
+                (click)="start(s)"
+                [disabled]="s.status === 'LIVE'"
+              >
+                بدء
+              </button>
+              <button
+                type="button"
+                class="btn btn-small btn-danger"
+                (click)="end(s)"
+                [disabled]="s.status !== 'LIVE'"
+              >
+                إيقاف
+              </button>
+              <a
+                [routerLink]="['/live/broadcast', s.id]"
+                class="link"
+              >
+                فتح صفحة البث
+              </a>
+              <a
+                [routerLink]="['/live', s.id]"
+                class="link"
+              >
+                صفحة المشاهدة
+              </a>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div *ngIf="!loading && !sessions.length && !error" class="hint">
+      لا توجد جلسات مسجلة في الوقت الحالي.
+    </div>
+  </div>
+</div>
+

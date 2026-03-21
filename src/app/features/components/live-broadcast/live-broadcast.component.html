@@ -1,0 +1,221 @@
+<div class="live-broadcast-page" dir="rtl">
+  <div class="live-broadcast-container">
+    <header class="page-header">
+      <h1 class="live-broadcast-title">
+        <span class="badge live-badge"><i class="fas fa-video"></i> غرفة البث المباشر</span>
+      </h1>
+      <div class="header-actions">
+        @if (session()) {
+        <div class="status-indicator">
+          <span class="pulse-dot" [class.active]="isStreaming() || isBridgeStreaming()"></span>
+          <span class="status-text">{{ session()?.status === 'LIVE' ? 'مباشر الآن' : (session()?.status === 'ENDED' ?
+            'منتهي' : 'مجدول') }}</span>
+        </div>
+        }
+      </div>
+    </header>
+
+    <div class="main-layout" [class.has-chat]="showBackendInfo() && session()">
+      <!-- القسم الأيمن (أو الرئيسي): الكاميرا والتحكم -->
+      <main class="content-section">
+
+        <div class="preview-card modern-card">
+          <div class="card-header">
+            <h2 class="card-title"><i class="fas fa-camera"></i> معاينة الكاميرا</h2>
+          </div>
+          <div class="card-body">
+            <div class="video-wrapper" [class.is-off]="!isStreaming() && !isInitializing()">
+              <video #previewVideo class="preview-video" autoplay playsinline muted>
+                المتصفح لا يدعم تشغيل الفيديو.
+              </video>
+
+              @if (!isStreaming() && !isInitializing()) {
+              <div class="overlay-message">
+                <div class="icon-circle"><i class="fas fa-video-slash"></i></div>
+                <p>الكاميرا متوقفة. اضغط للتشغيل.</p>
+              </div>
+              }
+            </div>
+
+            <div class="controls-bar">
+              <button type="button" class="btn btn-primary btn-icon" (click)="startCamera()"
+                [disabled]="isInitializing() || isStreaming()">
+                @if (isInitializing()) {
+                <i class="fas fa-spinner fa-spin"></i> جاري التهيئة...
+                } @else {
+                <i class="fas fa-play"></i> تشغيل الكاميرا
+                }
+              </button>
+
+              <button type="button" class="btn btn-danger btn-icon" (click)="stopStream()" [disabled]="!isStreaming()">
+                <i class="fas fa-stop"></i> إيقاف الكاميرا
+              </button>
+
+              @if (session() && isStreaming() && !isBridgeStreaming()) {
+              <button type="button" class="btn btn-success btn-icon pulse-btn" (click)="startFullBroadcast()"
+                [disabled]="!canStartFullBroadcast()">
+                <i class="fas fa-broadcast-tower"></i> إرسال البث
+              </button>
+              }
+              @if (isBridgeStreaming()) {
+              <button type="button" class="btn btn-warning btn-icon" (click)="stopStreamingToBridge()">
+                <i class="fas fa-times-circle"></i> قطع الإرسال
+              </button>
+              }
+            </div>
+
+            @if (isBridgeStreaming()) {
+            <div class="bridge-status-alert success">
+              <i class="fas fa-satellite-dish fade-icon"></i> البث متصل ويتم إرساله بنجاح
+            </div>
+            }
+            @if (bridgeError()) {
+            <div class="modern-alert error">
+              <i class="fas fa-exclamation-triangle"></i> {{ bridgeError() }}
+            </div>
+            }
+            @if (error()) {
+            <div class="modern-alert error">
+              <i class="fas fa-exclamation-circle"></i> {{ error() }}
+            </div>
+            }
+          </div>
+        </div>
+
+        <div class="backend-card modern-card">
+          <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-server"></i> إعدادات الجلسة والخادم</h3>
+          </div>
+
+          <div class="card-body">
+            @if (isLoadingSession()) {
+            <div class="loading-state">
+              <i class="fas fa-circle-notch fa-spin"></i> جاري المعالجة...
+            </div>
+            }
+
+            @if (!showBackendInfo()) {
+            <div class="setup-guide">
+              <p>قم بإنشاء تفاصيل البث أدناه لتوليد رابط المشاهدة وبدء استقبال المشاهدين.</p>
+            </div>
+
+            <form class="modern-form" (ngSubmit)="createSession()" novalidate>
+              <div class="form-grid">
+                <div class="field">
+                  <label>عنوان البث <span class="required">*</span></label>
+                  <input type="text" [ngModel]="title()" (ngModelChange)="title.set($event)" name="title" class="input"
+                    placeholder="مثال: درس تجويد وحفظ" required />
+                </div>
+                <div class="field">
+                  <label>مفتاح البث <span class="required">*</span></label>
+                  <input type="text" [ngModel]="streamKey()" (ngModelChange)="streamKey.set($event)" name="streamKey"
+                    class="input" placeholder="مثال: tajwid-session-1" required />
+                </div>
+              </div>
+
+              <div class="field">
+                <label>الوصف (اختياري)</label>
+                <textarea [ngModel]="description()" (ngModelChange)="description.set($event)" name="description"
+                  class="input" rows="2" placeholder="ما الذي سيتم تناوله في هذا البث؟"></textarea>
+              </div>
+
+              <div class="form-grid">
+                <div class="field">
+                  <label>نوع الوصول</label>
+                  <select [ngModel]="accessType()" (ngModelChange)="accessType.set($event)" name="accessType"
+                    class="input">
+                    <option value="EXTERNAL">عام (متاح للجميع)</option>
+                    <option value="INTERNAL">خاص (للمسجلين فقط)</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>تاريخ ووقت البدء <span class="required">*</span></label>
+                  <input type="datetime-local" [ngModel]="scheduledStartAt()"
+                    (ngModelChange)="scheduledStartAt.set($event)" name="scheduledStartAt" class="input" required />
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary btn-large" [disabled]="isLoadingSession()">
+                  <i class="fas fa-plus-circle"></i> إنشاء الغرفة
+                </button>
+              </div>
+            </form>
+            }
+
+            @if (showBackendInfo() && session()) {
+            <div class="session-info-dashboard">
+              <div class="info-badges">
+                <span class="info-badge blue"><i class="fas fa-tag"></i> {{ session()?.title }}</span>
+                <span class="info-badge dark"><i class="fas fa-key"></i> {{ session()?.streamKey }}</span>
+              </div>
+
+              <div class="link-box">
+                <label>رابط المشاهدة للطلاب</label>
+                <div class="link-row">
+                  <input type="text" readonly [value]="session()?.hlsPlaybackUrl" class="input readonly-input" />
+                  <a [routerLink]="['/live', session()?.id]" class="btn btn-outline" target="_blank" rel="noopener">
+                    <i class="fas fa-external-link-alt"></i> تجربة
+                  </a>
+                </div>
+              </div>
+
+              <div class="controls-bar backend-controls">
+                <button type="button" class="btn btn-primary" (click)="startLiveBackend()">
+                  <i class="fas fa-globe"></i> بدء البث للطلاب
+                </button>
+                <button type="button" class="btn btn-danger" (click)="endLiveBackend()">
+                  <i class="fas fa-power-off"></i> إنهاء البث
+                </button>
+              </div>
+            </div>
+            }
+          </div>
+        </div>
+      </main>
+
+      <!-- القسم الأيسر: الدردشة (تظهر فقط عند إنشاء الجلسة) -->
+      @if (showBackendInfo() && session()) {
+      <aside class="chat-section modern-card">
+        <div class="card-header chat-header">
+          <h3 class="card-title">
+            <i class="fas fa-comments"></i> الدردشة والمشاهدين
+          </h3>
+          <span class="comment-count">{{ comments().length }}</span>
+        </div>
+
+        <div class="chat-messages-container">
+          @if (loadingComments()) {
+          <div class="chat-status"><i class="fas fa-spinner fa-spin"></i> جاري التحديث...</div>
+          }
+          @if (commentsError()) {
+          <div class="chat-status error">{{ commentsError() }}</div>
+          }
+
+          @if (comments().length === 0) {
+          <div class="empty-chat">
+            <i class="far fa-comment-dots"></i>
+            <p>لا توجد تعليقات حتى الآن</p>
+          </div>
+          } @else {
+          <ul class="message-list">
+            @for (c of comments(); track c.id) {
+            <li class="message-bubble">
+              <div class="msg-meta">
+                <span class="msg-author"><i class="fas fa-user-circle"></i> {{ c.authorDisplayName || 'مشارك' }}</span>
+                <span class="msg-time">{{ c.createdAt | date:'HH:mm' }}</span>
+              </div>
+              <p class="msg-text">{{ c.content }}</p>
+            </li>
+            }
+          </ul>
+          }
+        </div>
+        <div class="chat-footer">
+          <p class="hint-text"><i class="fas fa-info-circle"></i> يتم تحديث التعليقات تلقائياً كل 5 ثوانٍ.</p>
+        </div>
+      </aside>
+      }
+    </div>
+  </div>
+</div>
