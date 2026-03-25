@@ -1,0 +1,443 @@
+<div class="sa-section" dir="rtl">
+
+    <!-- Header -->
+    <div class="sa-section-header">
+        <div>
+            <h1 class="sa-section-title">إدارة المواد الدراسية (Matières)</h1>
+            <p class="sa-section-subtitle">إنشاء وتعديل وحذف المواد، مع الدروس والموارد لكل مادة</p>
+        </div>
+        <button class="sa-btn sa-btn-primary" (click)="openAddModal()">
+            <i class="fas fa-plus"></i> إضافة مادة جديدة
+        </button>
+    </div>
+
+    <!-- Alerts -->
+    @if (successMessage()) {
+    <div class="sa-alert sa-alert-success">
+        <i class="fas fa-check-circle"></i> {{ successMessage() }}
+    </div>
+    }
+    @if (errorMessage()) {
+    <div class="sa-alert sa-alert-error">
+        <i class="fas fa-exclamation-circle"></i> {{ errorMessage() }}
+    </div>
+    }
+
+    <!-- Filters -->
+    <div class="sa-filters">
+        <div class="sa-filter-group">
+            <div class="sa-search-wrap">
+                <i class="fas fa-search"></i>
+                <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
+                    placeholder="بحث بالعنوان أو الوصف..." class="sa-search-input" />
+            </div>
+        </div>
+        <div class="sa-filter-group sa-filter-selects">
+            <select class="sa-select" [ngModel]="filterStatus()" (ngModelChange)="filterStatus.set($event)">
+                <option value="">كل الحالات</option>
+                @for (s of statuses; track s) {
+                <option [value]="s">{{ statusLabel(s) }}</option>
+                }
+            </select>
+            <select class="sa-select" [ngModel]="filterLevel()" (ngModelChange)="filterLevel.set($event)">
+                <option value="">كل المستويات</option>
+                @for (l of levels; track l) {
+                <option [value]="l">{{ levelLabel(l) }}</option>
+                }
+            </select>
+            <button class="sa-btn sa-btn-ghost" (click)="loadList()">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Stats Bar -->
+    <div class="sa-stats-mini">
+        <span class="sa-stat-chip sa-stat-chip-blue">
+            <i class="fas fa-book"></i> {{ list().length }} مقرر إجمالاً
+        </span>
+        <span class="sa-stat-chip sa-stat-chip-green">
+            <i class="fas fa-eye"></i> {{ filteredList().length }} نتيجة
+        </span>
+    </div>
+
+    <!-- Table -->
+    <div class="sa-table-card">
+        @if (loading()) {
+        <div class="sa-loading-row">
+            <i class="fas fa-spinner fa-spin"></i> جاري التحميل...
+        </div>
+        } @else if (filteredList().length === 0) {
+        <div class="sa-empty-state">
+            <div class="sa-empty-icon"><i class="fas fa-book-open"></i></div>
+            <p>لا توجد مقررات مطابقة</p>
+            <button class="sa-btn sa-btn-primary" (click)="openAddModal()">إضافة أول مقرر</button>
+        </div>
+        } @else {
+        <div class="sa-table-wrapper">
+            <table class="sa-table">
+                <thead>
+                    <tr>
+                        <th>العنوان</th>
+                        <th>المستوى</th>
+                        <th>الحالة</th>
+                        <th>الظهور</th>
+                        <th>عدد الدروس</th>
+                        <th>الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (course of filteredList(); track course.id) {
+                    <tr>
+                        <td>
+                            <p class="sa-table-name">{{ course.title }}</p>
+                            @if (course.description) {
+                            <p class="sa-table-sub">{{ course.description | slice:0:60 }}{{ (course.description?.length
+                                ?? 0) > 60 ?
+                                '...' : '' }}</p>
+                            }
+                        </td>
+                        <td>
+                            <span class="sa-badge" [class]="'sa-badge-level-' + course.level.toLowerCase()">
+                                {{ levelLabel(course.level) }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="sa-badge" [class.sa-badge-success]="course.status === 'PUBLISHED'"
+                                [class.sa-badge-warning]="course.status === 'DRAFT'"
+                                [class.sa-badge-neutral]="course.status === 'ARCHIVED'">
+                                {{ statusLabel(course.status) }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="sa-badge" [class.sa-badge-success]="course.isPublic"
+                                [class.sa-badge-neutral]="!course.isPublic">
+                                {{ course.isPublic ? 'عام' : 'خاص' }}
+                            </span>
+                        </td>
+                        <td class="sa-table-center">{{ course.numberOfLessons ?? 0 }}</td>
+                        <td>
+                            <div class="sa-table-actions">
+                                <button class="sa-action-btn sa-action-edit" (click)="openStructureModal(course)"
+                                    title="الدروس والموارد">
+                                    <i class="fas fa-sitemap"></i>
+                                </button>
+                                <button class="sa-action-btn sa-action-view" (click)="openDetailsModal(course)"
+                                    title="تفاصيل">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="sa-action-btn sa-action-edit" (click)="openEditModal(course)"
+                                    title="تعديل">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="sa-action-btn sa-action-delete" (click)="confirmDelete(course)"
+                                    title="حذف" [disabled]="loadingDelete() === course.id">
+                                    @if (loadingDelete() === course.id) {
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                    } @else {
+                                    <i class="fas fa-trash"></i>
+                                    }
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        }
+    </div>
+
+    <!-- ═══ FORM MODAL ═══ -->
+    @if (showFormModal()) {
+    <div class="sa-modal-overlay" (click)="closeFormModal()">
+        <div class="sa-modal" (click)="$event.stopPropagation()">
+            <div class="sa-modal-header">
+                <h3>{{ isEditing() ? 'تعديل المقرر' : 'إضافة مقرر جديد' }}</h3>
+                <button class="sa-modal-close" (click)="closeFormModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="sa-modal-body">
+                @if (errorMessage()) {
+                <div class="sa-alert sa-alert-error mb-4">{{ errorMessage() }}</div>
+                }
+                <div class="sa-form-grid">
+                    <!-- Title -->
+                    <div class="sa-field sa-field-full">
+                        <label class="sa-label">عنوان المقرر *</label>
+                        <input type="text" class="sa-input" [(ngModel)]="formModel.title"
+                            placeholder="مثال: تجويد القرآن الكريم" />
+                    </div>
+                    <!-- Description -->
+                    <div class="sa-field sa-field-full">
+                        <label class="sa-label">الوصف</label>
+                        <textarea class="sa-input sa-textarea" [(ngModel)]="formModel.description"
+                            placeholder="وصف مختصر للمقرر..."></textarea>
+                    </div>
+                    <!-- Level -->
+                    <div class="sa-field">
+                        <label class="sa-label">المستوى</label>
+                        <select class="sa-input" [(ngModel)]="formModel.level">
+                            @for (l of levels; track l) {
+                            <option [value]="l">{{ levelLabel(l) }}</option>
+                            }
+                        </select>
+                    </div>
+                    <!-- Status -->
+                    <div class="sa-field">
+                        <label class="sa-label">الحالة</label>
+                        <select class="sa-input" [(ngModel)]="formModel.status">
+                            @for (s of statuses; track s) {
+                            <option [value]="s">{{ statusLabel(s) }}</option>
+                            }
+                        </select>
+                    </div>
+                    <!-- isPublic -->
+                    <div class="sa-field sa-field-full sa-checkbox-field">
+                        <input type="checkbox" id="courseIsPublic" [(ngModel)]="formModel.isPublic" />
+                        <label for="courseIsPublic" class="sa-checkbox-label">مقرر عام (ظاهر للجميع دون تسجيل)</label>
+                    </div>
+                </div>
+            </div>
+            <div class="sa-modal-footer">
+                <button class="sa-btn sa-btn-ghost" (click)="closeFormModal()">إلغاء</button>
+                <button class="sa-btn sa-btn-primary" (click)="submitForm()" [disabled]="loadingSubmit()">
+                    @if (loadingSubmit()) { <i class="fas fa-spinner fa-spin"></i> } @else { <i class="fas fa-save"></i>
+                    }
+                    {{ loadingSubmit() ? 'جاري الحفظ...' : (isEditing() ? 'تحديث' : 'حفظ') }}
+                </button>
+            </div>
+        </div>
+    </div>
+    }
+
+    <!-- ═══ DETAILS MODAL ═══ -->
+    @if (showDetailsModal() && detailsCourse(); as course) {
+    <div class="sa-modal-overlay" (click)="closeDetailsModal()">
+        <div class="sa-modal" (click)="$event.stopPropagation()">
+            <div class="sa-modal-header">
+                <h3>تفاصيل المقرر</h3>
+                <button class="sa-modal-close" (click)="closeDetailsModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="sa-modal-body">
+                <div class="sa-details-grid">
+                    <div class="sa-details-item">
+                        <span class="sa-details-label">العنوان</span>
+                        <span class="sa-details-value">{{ course.title }}</span>
+                    </div>
+                    <div class="sa-details-item">
+                        <span class="sa-details-label">المستوى</span>
+                        <span class="sa-badge" [class]="'sa-badge-level-' + course.level.toLowerCase()">
+                            {{ levelLabel(course.level) }}
+                        </span>
+                    </div>
+                    <div class="sa-details-item">
+                        <span class="sa-details-label">الحالة</span>
+                        <span class="sa-badge" [class.sa-badge-success]="course.status === 'PUBLISHED'"
+                            [class.sa-badge-warning]="course.status === 'DRAFT'"
+                            [class.sa-badge-neutral]="course.status === 'ARCHIVED'">
+                            {{ statusLabel(course.status) }}
+                        </span>
+                    </div>
+                    <div class="sa-details-item">
+                        <span class="sa-details-label">الظهور</span>
+                        <span class="sa-badge" [class.sa-badge-success]="course.isPublic"
+                            [class.sa-badge-neutral]="!course.isPublic">
+                            {{ course.isPublic ? 'عام' : 'خاص' }}
+                        </span>
+                    </div>
+                    <div class="sa-details-item">
+                        <span class="sa-details-label">عدد الدروس</span>
+                        <span class="sa-details-value">{{ course.numberOfLessons ?? 0 }}</span>
+                    </div>
+                    <div class="sa-details-item">
+                        <span class="sa-details-label">المعرّف (Slug)</span>
+                        <span class="sa-details-value" dir="ltr">{{ course.slug || '—' }}</span>
+                    </div>
+                    @if (course.description) {
+                    <div class="sa-details-item sa-details-full">
+                        <span class="sa-details-label">الوصف</span>
+                        <span class="sa-details-value">{{ course.description }}</span>
+                    </div>
+                    }
+                    <div class="sa-details-item">
+                        <span class="sa-details-label">تاريخ الإنشاء</span>
+                        <span class="sa-details-value">{{ course.createdAt | date:'dd/MM/yyyy' }}</span>
+                    </div>
+                    <div class="sa-details-item">
+                        <span class="sa-details-label">آخر تحديث</span>
+                        <span class="sa-details-value">{{ course.updatedAt | date:'dd/MM/yyyy' }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="sa-modal-footer">
+                <button class="sa-btn sa-btn-ghost" (click)="closeDetailsModal()">إغلاق</button>
+                <button class="sa-btn sa-btn-primary" (click)="closeDetailsModal(); openEditModal(course)">
+                    <i class="fas fa-edit"></i> تعديل
+                </button>
+            </div>
+        </div>
+    </div>
+    }
+
+    <!-- ═══ STRUCTURE: دروس + موارد ═══ -->
+    @if (showStructureModal() && structureCourse(); as sc) {
+    <div class="sa-modal-overlay" (click)="closeStructureModal()">
+        <div class="sa-modal sa-modal-wide" (click)="$event.stopPropagation()">
+            <div class="sa-modal-header">
+                <h3>هيكل المقرر: {{ sc.title }}</h3>
+                <button class="sa-modal-close" (click)="closeStructureModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="sa-modal-body">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+                    <p class="text-sm text-slate-600 m-0">الدروس مرتبة حسب الترتيب، وكل درس يحتوي على موارد (نص، PDF،
+                        فيديو).</p>
+                    <button class="sa-btn sa-btn-primary" type="button" (click)="openAddLessonModal()">
+                        <i class="fas fa-plus"></i> إضافة درس
+                    </button>
+                </div>
+                @if (loadingStructure()) {
+                <div class="sa-loading-row"><i class="fas fa-spinner fa-spin"></i> جاري تحميل الدروس...</div>
+                } @else if (structureLessons().length === 0) {
+                <div class="sa-empty-state py-6">
+                    <p class="m-0">لا توجد دروس بعد. أضف أول درس لهذا المقرر.</p>
+                </div>
+                } @else {
+                @for (lesson of structureLessons(); track lesson.id) {
+                <div class="sa-structure-lesson">
+                    <div class="sa-structure-lesson-head">
+                        <div>
+                            <strong>{{ lesson.title }}</strong>
+                            <span class="sa-badge sa-badge-neutral mr-2">ترتيب: {{ lesson.orderIndex }}</span>
+                        </div>
+                        <div class="sa-table-actions">
+                            <button class="sa-action-btn sa-action-edit" type="button"
+                                (click)="openAddResourceModal(lesson.id)" title="إضافة مورد">
+                                <i class="fas fa-paperclip"></i>
+                            </button>
+                            <button class="sa-action-btn sa-action-edit" type="button"
+                                (click)="openEditLessonModal(lesson)" title="تعديل الدرس">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="sa-action-btn sa-action-delete" type="button"
+                                (click)="confirmDeleteLesson(lesson)" title="حذف الدرس">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    @if (lesson.description) {
+                    <p class="text-sm text-slate-600 mb-2 m-0">{{ lesson.description }}</p>
+                    }
+                    <div class="text-xs font-bold text-slate-500 mb-1">الموارد</div>
+                    @if (lessonResources(lesson).length === 0) {
+                    <p class="text-sm text-slate-400 m-0">لا توجد موارد — استخدم زر المشبك لإضافة رابط.</p>
+                    } @else {
+                    @for (r of lessonResources(lesson); track r.id) {
+                    <div class="sa-resource-row">
+                        <span dir="ltr" class="truncate flex-1">
+                            <span class="sa-badge sa-badge-neutral">{{ resourceTypeLabel(r.type) }}</span>
+                            {{ r.name }}
+                            <a [href]="r.fileUrl" target="_blank" rel="noopener" class="text-indigo-600 mr-1">فتح</a>
+                        </span>
+                        <button class="sa-action-btn sa-action-delete" type="button" (click)="confirmDeleteResource(r)"
+                            title="حذف">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    }
+                    }
+                </div>
+                }
+                }
+            </div>
+            <div class="sa-modal-footer">
+                <button class="sa-btn sa-btn-ghost" type="button" (click)="closeStructureModal()">إغلاق</button>
+            </div>
+        </div>
+    </div>
+    }
+
+    <!-- ═══ LESSON FORM MODAL ═══ -->
+    @if (showLessonModal()) {
+    <div class="sa-modal-overlay" (click)="closeLessonModal()">
+        <div class="sa-modal" (click)="$event.stopPropagation()">
+            <div class="sa-modal-header">
+                <h3>{{ editingLessonId() ? 'تعديل الدرس' : 'درس جديد' }}</h3>
+                <button class="sa-modal-close" (click)="closeLessonModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="sa-modal-body">
+                <div class="sa-form-grid">
+                    <div class="sa-field sa-field-full">
+                        <label class="sa-label">عنوان الدرس *</label>
+                        <input type="text" class="sa-input" [(ngModel)]="lessonForm.title" />
+                    </div>
+                    <div class="sa-field sa-field-full">
+                        <label class="sa-label">الوصف</label>
+                        <textarea class="sa-input sa-textarea" [(ngModel)]="lessonForm.description"></textarea>
+                    </div>
+                    <div class="sa-field">
+                        <label class="sa-label">ترتيب العرض</label>
+                        <input type="number" class="sa-input" [(ngModel)]="lessonForm.orderIndex" min="1" />
+                    </div>
+                </div>
+            </div>
+            <div class="sa-modal-footer">
+                <button class="sa-btn sa-btn-ghost" type="button" (click)="closeLessonModal()">إلغاء</button>
+                <button class="sa-btn sa-btn-primary" type="button" (click)="submitLesson()"
+                    [disabled]="lessonFormSaving()">
+                    @if (lessonFormSaving()) { <i class="fas fa-spinner fa-spin"></i> } @else { <i
+                        class="fas fa-save"></i> }
+                    {{ lessonFormSaving() ? '...' : 'حفظ' }}
+                </button>
+            </div>
+        </div>
+    </div>
+    }
+
+    <!-- ═══ RESOURCE FORM MODAL ═══ -->
+    @if (showResourceModal()) {
+    <div class="sa-modal-overlay" (click)="closeResourceModal()">
+        <div class="sa-modal" (click)="$event.stopPropagation()">
+            <div class="sa-modal-header">
+                <h3>إضافة مورد للدرس</h3>
+                <button class="sa-modal-close" (click)="closeResourceModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="sa-modal-body">
+                <div class="sa-form-grid">
+                    <div class="sa-field sa-field-full">
+                        <label class="sa-label">اسم المورد *</label>
+                        <input type="text" class="sa-input" [(ngModel)]="resourceForm.name"
+                            placeholder="مثال: ملف الدرس الأول" />
+                    </div>
+                    <div class="sa-field sa-field-full">
+                        <label class="sa-label">رابط الملف (URL) *</label>
+                        <input type="url" class="sa-input" dir="ltr" [(ngModel)]="resourceForm.fileUrl"
+                            placeholder="https://..." />
+                    </div>
+                    <div class="sa-field">
+                        <label class="sa-label">النوع</label>
+                        <select class="sa-input" [(ngModel)]="resourceForm.type">
+                            @for (t of resourceTypes; track t) {
+                            <option [value]="t">{{ resourceTypeLabel(t) }}</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="sa-field">
+                        <label class="sa-label">الحجم (اختياري، بايت)</label>
+                        <input type="number" class="sa-input" [(ngModel)]="resourceForm.size" min="0" />
+                    </div>
+                </div>
+            </div>
+            <div class="sa-modal-footer">
+                <button class="sa-btn sa-btn-ghost" type="button" (click)="closeResourceModal()">إلغاء</button>
+                <button class="sa-btn sa-btn-primary" type="button" (click)="submitResource()"
+                    [disabled]="resourceFormSaving()">
+                    @if (resourceFormSaving()) { <i class="fas fa-spinner fa-spin"></i> } @else { <i
+                        class="fas fa-plus"></i> }
+                    إضافة
+                </button>
+            </div>
+        </div>
+    </div>
+    }
+
+</div>

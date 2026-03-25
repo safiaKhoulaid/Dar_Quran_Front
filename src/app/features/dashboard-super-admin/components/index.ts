@@ -6,3 +6,4 @@ export { AdminManagementComponent } from './admin-management/admin-management.co
 export { TeacherManagementComponent } from './teacher-management/teacher-management.component';
 export { StudentManagementComponent } from './student-management/student-management.component';
 export { ClassManagementComponent } from './class-management/class-management.component';
+export { CourseManagementComponent } from './course-management/course-management.component';

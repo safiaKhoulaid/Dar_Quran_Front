@@ -1,3 +1,7 @@
+import { AbsenceStatus } from '@features/models/student/absence.model';
+
+export { AbsenceStatus };
+
 /** Réponse salle/classe pour le dashboard enseignant (aligné backend RoomResponse). */
 export interface TeacherRoomResponse {
   id: string;
@@ -15,8 +19,7 @@ export interface TeacherStudentResponse {
   email?: string;
 }
 
-export type AbsenceStatus = 'JUSTIFIED' | 'UNJUSTIFIED' | 'PENDING';
-
+/** Aligné backend StudentAbsenceResponse (GET /api/teacher/absences). */
 export interface StudentAbsenceResponse {
   id: string;
   studentId: string;
@@ -28,10 +31,11 @@ export interface StudentAbsenceResponse {
   justificationText?: string;
   justificationFileUrl?: string;
   createdAt: string;
-  dayOfWeek?: number;
-  startTime?: string;
+  courseTitle?: string;
+  teacherName?: string;
 }
 
+/** Aligné backend StudentAbsenceRequest (POST /api/teacher/absences). */
 export interface StudentAbsenceRequest {
   studentId: string;
   scheduleSlotId: string;
@@ -41,16 +45,18 @@ export interface StudentAbsenceRequest {
   justificationFileUrl?: string;
 }
 
+/** Aligné backend StudentGradeResponse (GET/POST /api/teacher/grades). */
 export interface StudentGradeResponse {
   id: string;
   studentId: string;
   studentName: string;
   courseId: string;
   courseTitle: string;
-  value: number;
+  value?: number | null;
   gradeDate?: string;
   comment?: string;
   teacherId: string;
+  teacherName?: string;
   createdAt: string;
 }
 

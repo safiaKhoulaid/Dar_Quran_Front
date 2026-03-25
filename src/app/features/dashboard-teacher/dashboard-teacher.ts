@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, inject, ViewChild, ElementRef, OnDestroy } from '@angular/core';
+import { Component, OnInit, signal, inject, ViewChild, ElementRef, OnDestroy, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -9,31 +9,39 @@ import { LiveStreamingService } from '@features/services/liveStreamingService/li
 import type { LiveSession, LiveSessionRequest, LiveSessionStatus } from '@features/models/live-streaming/live-session.model';
 import type { LiveComment } from '@features/models/live-streaming/live-comment.model';
 import type { CourseResponse } from '@features/models/course/course.model';
-import type {
-  TeacherRoomResponse,
-  TeacherStudentResponse,
-  StudentAbsenceResponse,
-  StudentGradeResponse,
-  StudentAbsenceRequest,
-  StudentGradeRequest,
+import { CourseManagementComponent } from '../dashboard-super-admin/components/course-management/course-management.component';
+import { DashboardNotificationsPanelComponent } from '@features/components/dashboard-notifications-panel/dashboard-notifications-panel';
+import { UserNotificationStore } from '@features/services/user-notification/user-notification.store';
+import {
+  AbsenceStatus,
+  type TeacherRoomResponse,
+  type TeacherStudentResponse,
+  type StudentAbsenceResponse,
+  type StudentGradeResponse,
+  type StudentAbsenceRequest,
+  type StudentGradeRequest,
 } from '@features/models/teacher-dashboard/teacher-dashboard.model';
 import type { ScheduleSlotResponse } from '@features/models/schedule/schedule.model';
 
 @Component({
   selector: 'app-dashboard-teacher',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, CourseManagementComponent, DashboardNotificationsPanelComponent],
   templateUrl: './dashboard-teacher.html',
   styleUrls: ['./dashboard-teacher.css'],
 })
 export class DashboardTeacherComponent implements OnInit, OnDestroy {
   @ViewChild('studioVideo') studioVideoRef?: ElementRef<HTMLVideoElement>;
 
+  /** Pour les options du template (ngValue). */
+  readonly AbsenceStatus = AbsenceStatus;
+
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private authService = inject(AuthService);
   private teacherDashboard = inject(TeacherDashboardService);
   private liveStreaming = inject(LiveStreamingService);
+  readonly notificationStore = inject(UserNotificationStore);
 
   selectedTab = 'overview';
   currentUserName = '';
@@ -81,6 +89,13 @@ export class DashboardTeacherComponent implements OnInit, OnDestroy {
   studentsForAbsence = signal<TeacherStudentResponse[]>([]);
   scheduleSlotsForAbsence = signal<ScheduleSlotResponse[]>([]);
   selectedAbsenceRoomId = signal('');
+  /** Créneaux filtrés par la salle choisie (évite les créneaux d’une autre قاعة). */
+  filteredAbsenceSlots = computed(() => {
+    const roomId = this.selectedAbsenceRoomId();
+    const slots = this.scheduleSlotsForAbsence();
+    if (!roomId) return slots;
+    return slots.filter((s) => s.roomId === roomId);
+  });
   absencesList = signal<StudentAbsenceResponse[]>([]);
   absenceLoading = signal(false);
   showAbsenceForm = signal(false);
@@ -90,7 +105,7 @@ export class DashboardTeacherComponent implements OnInit, OnDestroy {
     studentId: '',
     scheduleSlotId: '',
     date: new Date().toISOString().slice(0, 10),
-    status: 'UNJUSTIFIED',
+    status: AbsenceStatus.ABSENT,
   };
 
   // Grades
@@ -118,9 +133,10 @@ export class DashboardTeacherComponent implements OnInit, OnDestroy {
   };
 
   absenceStatusLabels: Record<string, string> = {
-    JUSTIFIED: 'مبررة',
-    UNJUSTIFIED: 'غير مبررة',
-    PENDING: 'قيد المراجعة',
+    PRESENT: 'حاضر',
+    ABSENT: 'غائب',
+    LATE: 'متأخر',
+    EXCUSED: 'غياب مبرر',
   };
 
   dayLabels: Record<number, string> = {
@@ -144,6 +160,7 @@ export class DashboardTeacherComponent implements OnInit, OnDestroy {
       : user?.name || user?.email || 'المعلم';
 
     this.loadOverview();
+    this.notificationStore.loadUnreadCount();
     const tab = this.route.snapshot.queryParamMap.get('tab');
     if (tab) {
       this.selectedTab = tab;
@@ -163,6 +180,7 @@ export class DashboardTeacherComponent implements OnInit, OnDestroy {
     if (tabId === 'live') this.loadMyLiveSessions();
     if (tabId === 'absences') this.loadAbsencesData();
     if (tabId === 'grades') this.loadGradesData();
+    if (tabId === 'notifications') this.notificationStore.refresh();
   }
 
   loadOverview(): void {
@@ -181,14 +199,25 @@ export class DashboardTeacherComponent implements OnInit, OnDestroy {
     });
   }
 
+  goToNewCourseCreator(): void {
+    this.router.navigate(['/courses/create']);
+  }
+
   loadMyLiveSessions(): void {
     this.liveLoading.set(true);
     this.liveError.set('');
     const currentUser = this.authService.currentUser();
-    const myId = currentUser?.id ?? currentUser?.email;
+    const myId = (currentUser?.id ?? '').trim();
     this.liveStreaming.getSessions(0, 100).subscribe({
       next: (page) => {
-        const list = (page?.content ?? []).filter((s) => s.teacherId === myId);
+        const sessions = page?.content ?? [];
+        // Si l'ID backend n'est pas disponible dans le token/profil, on évite de filtrer strictement
+        // pour ne pas masquer toutes les sessions côté enseignant.
+        const list = sessions.filter((s) => {
+          const sessionTeacherId = (s.teacherId ?? '').trim();
+          if (myId) return sessionTeacherId === myId;
+          return true;
+        });
         this.myLiveSessions.set(list);
         this.liveLoading.set(false);
       },
@@ -232,6 +261,15 @@ export class DashboardTeacherComponent implements OnInit, OnDestroy {
   createLive(): void {
     if (!this.liveForm.title?.trim()) {
       this.liveError.set('العنوان مطلوب.');
+      return;
+    }
+    const streamKey = this.liveForm.streamKey?.trim();
+    if (!streamKey) {
+      this.liveError.set('مفتاح البث مطلوب.');
+      return;
+    }
+    if (/\s/.test(streamKey)) {
+      this.liveError.set('مفتاح البث يجب ألا يحتوي على مسافات.');
       return;
     }
     this.savingLive.set(true);
@@ -278,7 +316,11 @@ export class DashboardTeacherComponent implements OnInit, OnDestroy {
 
   startLive(s: LiveSession): void {
     this.liveStreaming.startStream(s.id).subscribe({
-      next: () => {
+      next: (updated) => {
+        if (!updated) {
+          this.liveError.set('فشل بدء البث.');
+          return;
+        }
         this.loadMyLiveSessions();
         this.liveSuccess.set('تم بدء البث. تم إرسال إشعار للمستخدمين من نفس القسم فقط.');
       },
@@ -288,7 +330,13 @@ export class DashboardTeacherComponent implements OnInit, OnDestroy {
 
   endLive(s: LiveSession): void {
     this.liveStreaming.endStream(s.id).subscribe({
-      next: () => this.loadMyLiveSessions(),
+      next: (updated) => {
+        if (!updated) {
+          this.liveError.set('فشل إيقاف البث.');
+          return;
+        }
+        this.loadMyLiveSessions();
+      },
       error: () => this.liveError.set('فشل إيقاف البث.'),
     });
   }
@@ -463,7 +511,7 @@ export class DashboardTeacherComponent implements OnInit, OnDestroy {
       studentId: '',
       scheduleSlotId: '',
       date: new Date().toISOString().slice(0, 10),
-      status: 'UNJUSTIFIED',
+      status: AbsenceStatus.ABSENT,
     };
     this.absenceError.set('');
     this.showAbsenceForm.set(true);
@@ -482,8 +530,12 @@ export class DashboardTeacherComponent implements OnInit, OnDestroy {
     this.savingAbsence.set(true);
     this.absenceError.set('');
     this.teacherDashboard.markAbsence(req).subscribe({
-      next: () => {
+      next: (res) => {
         this.savingAbsence.set(false);
+        if (!res) {
+          this.absenceError.set('فشل تسجيل الغياب (تحقق من الصلاحيات أو البيانات).');
+          return;
+        }
         this.closeAbsenceForm();
         const roomId = this.selectedAbsenceRoomId();
         if (roomId) this.teacherDashboard.getAbsencesByClass(roomId).subscribe((list) => this.absencesList.set(list));
@@ -546,8 +598,12 @@ export class DashboardTeacherComponent implements OnInit, OnDestroy {
     this.savingGrade.set(true);
     this.gradeError.set('');
     this.teacherDashboard.addGrade(req).subscribe({
-      next: () => {
+      next: (res) => {
         this.savingGrade.set(false);
+        if (!res) {
+          this.gradeError.set('فشل إضافة النقطة (تحقق من الصلاحيات أو البيانات).');
+          return;
+        }
         this.closeGradeForm();
         const courseId = this.selectedGradeCourseId();
         if (courseId) this.teacherDashboard.getGradesByCourse(courseId).subscribe((list) => this.gradesList.set(list));
@@ -571,6 +627,16 @@ export class DashboardTeacherComponent implements OnInit, OnDestroy {
   slotDayLabel(day: number | undefined): string {
     if (day === undefined) return '';
     return this.dayLabels[day] ?? '';
+  }
+
+  formatTime(time: string | { hour?: number; minute?: number } | null | undefined): string {
+    if (time == null) return '';
+    if (typeof time === 'string') {
+      return time.length >= 5 ? time.substring(0, 5) : time;
+    }
+    const h = time.hour ?? 0;
+    const m = time.minute ?? 0;
+    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
   }
 
   toggleSidebar(): void {

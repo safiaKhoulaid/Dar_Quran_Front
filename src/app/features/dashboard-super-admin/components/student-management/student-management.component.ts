@@ -23,8 +23,6 @@ export class StudentManagementComponent implements OnInit {
   list = signal<Student[]>([]);
   gender = signal<Gender>('HOMME');
   searchQuery = signal<string>('');
-  classFilter = signal<string>('');
-  levelFilter = signal<string>('');
 
   successMessage = signal<string>('');
   errorMessage = signal<string>('');
@@ -122,6 +120,9 @@ export class StudentManagementComponent implements OnInit {
         : '',
       role: undefined,
       status: (s as any).status ?? 'نشط'
+      ,
+      className: (s as any).className ?? (s as any).class_name ?? '',
+      teacherName: (s as any).teacherName ?? (s as any).teacher_name ?? ''
     };
   }
 

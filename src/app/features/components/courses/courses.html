@@ -1,0 +1,147 @@
+<div class="courses-page">
+  <div class="courses-header">
+    <div class="header-content">
+      <h1 class="page-title">اكتشف دوراتنا</h1>
+      <p class="page-subtitle">رحلة علمية متميزة في رحاب القرآن الكريم وعلومه</p>
+    </div>
+  </div>
+
+  <div class="courses-container">
+    @if (isLoading()) {
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <p>جاري تحميل الدورات...</p>
+      </div>
+    } @else if (error()) {
+      <div class="error-state">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <p>{{ error() }}</p>
+        <button class="retry-btn" (click)="loadCourses()">إعادة المحاولة</button>
+      </div>
+    } @else if (filteredCourses().length === 0) {
+      <div class="empty-state">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path>
+        </svg>
+        <p>لا توجد دورات متاحة حالياً.</p>
+      </div>
+    } @else {
+      <div class="courses-grid">
+        @for (course of filteredCourses(); track course.id) {
+          <div class="course-card" [class.is-expanded]="expandedLessons().has(course.id)">
+            <!-- Course Image -->
+            <div class="course-image-wrapper">
+              @if (course.miniature) {
+                <img [ngSrc]="course.miniature" alt="{{ course.title }}" fill class="course-image">
+              } @else {
+                <div class="course-placeholder">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#6B9B7A" stroke-width="1.5">
+                    <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path>
+                  </svg>
+                </div>
+              }
+              <div class="course-badges">
+                @if (course.isPublic) {
+                  <span class="badge public">عامة</span>
+                } @else {
+                  <span class="badge private">خاصة</span>
+                }
+                <span class="badge level">{{ course.level }}</span>
+              </div>
+            </div>
+
+            <!-- Course Info -->
+            <div class="course-info">
+              <h3 class="course-title">{{ course.title }}</h3>
+              <p class="course-description">{{ course.description || 'لا يوجد وصف.' }}</p>
+              
+              <div class="course-meta">
+                <div class="meta-item">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path>
+                  </svg>
+                  <span>{{ course.numberOfLessons || 0 }} دروس</span>
+                </div>
+              </div>
+
+              <!-- Action Button -->
+              <button class="toggle-lessons-btn" (click)="toggleCourse(course.id)">
+                <span>{{ expandedLessons().has(course.id) ? 'إخفاء الدروس' : 'عرض المحتوى' }}</span>
+                <svg [class.rotated]="expandedLessons().has(course.id)" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="m6 9 6 6 6-6"/>
+                </svg>
+              </button>
+            </div>
+
+            <!-- Expanded Lessons Section -->
+            @if (expandedLessons().has(course.id) || loadingLessons().get(course.id)) {
+              <div class="lessons-section">
+                @if (loadingLessons().get(course.id)) {
+                  <div class="lessons-loading">
+                    <div class="small-spinner"></div>
+                    <span>جاري تحميل الدروس...</span>
+                  </div>
+                } @else {
+                  @if (expandedLessons().get(course.id)?.length === 0) {
+                    <div class="no-lessons">لم يتم إضافة دروس لهذه الدورة بعد.</div>
+                  } @else {
+                    <div class="lesson-layout">
+                      <aside class="lesson-sidebar">
+                        @for (lesson of expandedLessons().get(course.id); track lesson.id) {
+                          <button class="lesson-nav-item"
+                            [class.active]="getSelectedLesson(course.id)?.id === lesson.id"
+                            (click)="selectLesson(course.id, lesson.id)">
+                            <span class="lesson-number">{{ lesson.orderIndex }}</span>
+                            <span class="lesson-name">{{ lesson.title }}</span>
+                          </button>
+                        }
+                      </aside>
+
+                      <section class="lesson-main-view">
+                        @if (getSelectedLesson(course.id); as selected) {
+                          <h4 class="lesson-main-title">{{ selected.title }}</h4>
+                          @if (getMainResource(selected); as mainResource) {
+                            @if (mainResource.type === 'VIDEO') {
+                              <video class="lesson-player" controls [src]="mainResource.fileUrl"></video>
+                            } @else if (mainResource.type === 'PDF') {
+                              <iframe class="lesson-pdf" [src]="mainResource.fileUrl"></iframe>
+                            } @else {
+                              <div class="lesson-rich-text" [innerHTML]="mainResource.fileUrl"></div>
+                            }
+                          } @else {
+                            <div class="lesson-rich-text">{{ selected.description || 'لا يوجد محتوى رئيسي لهذا الدرس.' }}</div>
+                          }
+                          <p class="lesson-description">{{ selected.description || 'بدون وصف.' }}</p>
+
+                          <div class="resources-list isolated">
+                            <span class="resources-title">Ressources</span>
+                            @if (getSecondaryResources(selected).length === 0) {
+                              <p class="no-lessons">لا توجد موارد إضافية قابلة للتحميل.</p>
+                            } @else {
+                              @for (resource of getSecondaryResources(selected); track resource.id) {
+                                <a [href]="resource.fileUrl" target="_blank" class="resource-link">
+                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+                                  </svg>
+                                  {{ resource.name || 'ملف مرفق' }}
+                                </a>
+                              }
+                            }
+                          </div>
+                        }
+                      </section>
+                    </div>
+                  }
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

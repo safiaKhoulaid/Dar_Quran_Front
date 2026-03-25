@@ -1,0 +1,1101 @@
+﻿[33mÔØ»[39m Building...
+[32mÔ£ö[39m Building...
+Application bundle generation failed. [46.424 seconds] - 2026-03-24T16:13:36.268Z
+
+node.exe : [1m[33m[33mÔû▓ 
+[43;33m[[43;30mWARNING[43;33m][0m 
+[1mNG8107: The left side of this optional 
+chain operation does not include 'null' or 
+'undefined' in its type, therefore the 
+'?.' operator can be safely removed.[0m 
+[1m[35m[plugin angular-compiler][0m
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" 
+"C:\Users\ycode\AppData\Roaming\ ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified 
+   : ([1m[33m[33mÔ...r-compiler][0m:S  
+  tring) [], RemoteException
+    + FullyQualifiedErrorId : NativeComman 
+   dError
+ 
+
+    src/app/features/dashboard-super-admin/
+components/admin-management/admin-managemen
+t.component.html:106:27:
+[37m      106 Ôöé                         
+{{ [32madmin.prenom?.[0][37m }}{{ 
+admin.nom?.[0] }}
+          ÔòÁ                            
+[32m~~~~~~~~~~~~~~~~~[0m
+
+  Warning occurs in the template of 
+component AdminManagementComponent.
+
+    src/app/features/dashboard-super-admin/
+components/admin-management/admin-managemen
+t.component.ts:16:15:
+[37m      16 Ôöé   templateUrl: [32m'./ad
+min-management.component.html'[37m,
+         ÔòÁ                [32m~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33mÔû▓ 
+[43;33m[[43;30mWARNING[43;33m][0m 
+[1mNG8107: The left side of this optional 
+chain operation does not include 'null' or 
+'undefined' in its type, therefore the 
+'?.' operator can be safely removed.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard-super-admin/
+components/admin-management/admin-managemen
+t.component.html:106:50:
+[37m      106 Ôöé                         
+{{ admin.prenom?.[0] }}{{ 
+[32madmin.nom?.[0][37m }}
+          ÔòÁ                              
+                     
+[32m~~~~~~~~~~~~~~[0m
+
+  Warning occurs in the template of 
+component AdminManagementComponent.
+
+    src/app/features/dashboard-super-admin/
+components/admin-management/admin-managemen
+t.component.ts:16:15:
+[37m      16 Ôöé   templateUrl: [32m'./ad
+min-management.component.html'[37m,
+         ÔòÁ                [32m~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33mÔû▓ 
+[43;33m[[43;30mWARNING[43;33m][0m 
+[1mNG8107: The left side of this optional 
+chain operation does not include 'null' or 
+'undefined' in its type, therefore the 
+'?.' operator can be safely removed.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard-super-admin/
+components/admin-management/admin-managemen
+t.component.html:162:27:
+[37m      162 Ôöé                         
+{{ [32madmin.prenom?.[0][37m }}{{ 
+admin.nom?.[0] }}
+          ÔòÁ                            
+[32m~~~~~~~~~~~~~~~~~[0m
+
+  Warning occurs in the template of 
+component AdminManagementComponent.
+
+    src/app/features/dashboard-super-admin/
+components/admin-management/admin-managemen
+t.component.ts:16:15:
+[37m      16 Ôöé   templateUrl: [32m'./ad
+min-management.component.html'[37m,
+         ÔòÁ                [32m~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33mÔû▓ 
+[43;33m[[43;30mWARNING[43;33m][0m 
+[1mNG8107: The left side of this optional 
+chain operation does not include 'null' or 
+'undefined' in its type, therefore the 
+'?.' operator can be safely removed.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard-super-admin/
+components/admin-management/admin-managemen
+t.component.html:162:50:
+[37m      162 Ôöé                         
+{{ admin.prenom?.[0] }}{{ 
+[32madmin.nom?.[0][37m }}
+          ÔòÁ                              
+                     
+[32m~~~~~~~~~~~~~~[0m
+
+  Warning occurs in the template of 
+component AdminManagementComponent.
+
+    src/app/features/dashboard-super-admin/
+components/admin-management/admin-managemen
+t.component.ts:16:15:
+[37m      16 Ôöé   templateUrl: [32m'./ad
+min-management.component.html'[37m,
+         ÔòÁ                [32m~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33mÔû▓ 
+[43;33m[[43;30mWARNING[43;33m][0m 
+[1mNG8107: The left side of this optional 
+chain operation does not include 'null' or 
+'undefined' in its type, therefore the 
+'?.' operator can be replaced with the '.' 
+operator.[0m [1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/features/dashboard-super-admin/
+components/course-management/course-managem
+ent.component.html:95:113:
+[37m      95 Ôöé ...{ course.description 
+| slice:0:60 }}{{ 
+(course.description?.[32mlength[37m
+         ÔòÁ                               
+                                 
+[32m~~~~~~[0m
+
+  Warning occurs in the template of 
+component CourseManagementComponent.
+
+    src/app/features/dashboard-super-admin/
+components/course-management/course-managem
+ent.component.ts:15:17:
+[37m      15 Ôöé     templateUrl: [32m'./
+course-management.component.html'[37m,
+         ÔòÁ                  [32m~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33mÔû▓ 
+[43;33m[[43;30mWARNING[43;33m][0m 
+[1mNG8102: The left side of this nullish 
+coalescing operation does not include 
+'null' or 'undefined' in its type, 
+therefore the '??' operator can be safely 
+removed.[0m [1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/features/dashboard-super-admin/
+components/course-management/course-managem
+ent.component.html:118:55:
+[37m      118 Ôöé ...td 
+class="sa-table-center">{{ 
+[32mcourse.numberOfLessons ?? 0[37m 
+}}</td>
+          ÔòÁ                              
+    [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Warning occurs in the template of 
+component CourseManagementComponent.
+
+    src/app/features/dashboard-super-admin/
+components/course-management/course-managem
+ent.component.ts:15:17:
+[37m      15 Ôöé     templateUrl: [32m'./
+course-management.component.html'[37m,
+         ÔòÁ                  [32m~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33mÔû▓ 
+[43;33m[[43;30mWARNING[43;33m][0m 
+[1mNG8102: The left side of this nullish 
+coalescing operation does not include 
+'null' or 'undefined' in its type, 
+therefore the '??' operator can be safely 
+removed.[0m [1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/features/dashboard-super-admin/
+components/course-management/course-managem
+ent.component.html:250:58:
+[37m      250 Ôöé 
+...class="sa-details-value">{{ 
+[32mcourse.numberOfLessons ?? 0[37m 
+}}</span>
+          ÔòÁ                              
+  [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Warning occurs in the template of 
+component CourseManagementComponent.
+
+    src/app/features/dashboard-super-admin/
+components/course-management/course-managem
+ent.component.ts:15:17:
+[37m      15 Ôöé     templateUrl: [32m'./
+course-management.component.html'[37m,
+         ÔòÁ                  [32m~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33mÔû▓ 
+[43;33m[[43;30mWARNING[43;33m][0m 
+[1mNG8107: The left side of this optional 
+chain operation does not include 'null' or 
+'undefined' in its type, therefore the 
+'?.' operator can be safely removed.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard-super-admin/
+components/student-management/student-manag
+ement.component.html:94:25:
+[37m      94 Ôöé                       {{ 
+[32ms.prenom?.[0][37m }}{{ s.nom?.[0] }}
+         ÔòÁ                          
+[32m~~~~~~~~~~~~~[0m
+
+  Warning occurs in the template of 
+component StudentManagementComponent.
+
+    src/app/features/dashboard-super-admin/
+components/student-management/student-manag
+ement.component.ts:12:15:
+[37m      12 Ôöé   templateUrl: [32m'./st
+udent-management.component.html'[37m,
+         ÔòÁ                [32m~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33mÔû▓ 
+[43;33m[[43;30mWARNING[43;33m][0m 
+[1mNG8107: The left side of this optional 
+chain operation does not include 'null' or 
+'undefined' in its type, therefore the 
+'?.' operator can be safely removed.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard-super-admin/
+components/student-management/student-manag
+ement.component.html:94:44:
+[37m      94 Ôöé                       {{ 
+s.prenom?.[0] }}{{ [32ms.nom?.[0][37m }}
+         ÔòÁ                               
+              [32m~~~~~~~~~~[0m
+
+  Warning occurs in the template of 
+component StudentManagementComponent.
+
+    src/app/features/dashboard-super-admin/
+components/student-management/student-manag
+ement.component.ts:12:15:
+[37m      12 Ôöé   templateUrl: [32m'./st
+udent-management.component.html'[37m,
+         ÔòÁ                [32m~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33mÔû▓ 
+[43;33m[[43;30mWARNING[43;33m][0m 
+[1mNG8107: The left side of this optional 
+chain operation does not include 'null' or 
+'undefined' in its type, therefore the 
+'?.' operator can be safely removed.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard-super-admin/
+components/student-management/student-manag
+ement.component.html:160:25:
+[37m      160 Ôöé                       
+{{ [32ms.prenom?.[0][37m }}{{ s.nom?.[0] 
+}}
+          ÔòÁ                          
+[32m~~~~~~~~~~~~~[0m
+
+  Warning occurs in the template of 
+component StudentManagementComponent.
+
+    src/app/features/dashboard-super-admin/
+components/student-management/student-manag
+ement.component.ts:12:15:
+[37m      12 Ôöé   templateUrl: [32m'./st
+udent-management.component.html'[37m,
+         ÔòÁ                [32m~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33mÔû▓ 
+[43;33m[[43;30mWARNING[43;33m][0m 
+[1mNG8107: The left side of this optional 
+chain operation does not include 'null' or 
+'undefined' in its type, therefore the 
+'?.' operator can be safely removed.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard-super-admin/
+components/student-management/student-manag
+ement.component.html:160:44:
+[37m      160 Ôöé                       
+{{ s.prenom?.[0] }}{{ [32ms.nom?.[0][37m 
+}}
+          ÔòÁ                              
+               [32m~~~~~~~~~~[0m
+
+  Warning occurs in the template of 
+component StudentManagementComponent.
+
+    src/app/features/dashboard-super-admin/
+components/student-management/student-manag
+ement.component.ts:12:15:
+[37m      12 Ôöé   templateUrl: [32m'./st
+udent-management.component.html'[37m,
+         ÔòÁ                [32m~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33mÔû▓ 
+[43;33m[[43;30mWARNING[43;33m][0m 
+[1mNG8107: The left side of this optional 
+chain operation does not include 'null' or 
+'undefined' in its type, therefore the 
+'?.' operator can be safely removed.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard-super-admin/
+components/teacher-management/teacher-manag
+ement.component.html:79:27:
+[37m      79 Ôöé                         
+{{ [32mt.prenom?.[0][37m }}{{ t.nom?.[0] 
+}}
+         ÔòÁ                            
+[32m~~~~~~~~~~~~~[0m
+
+  Warning occurs in the template of 
+component TeacherManagementComponent.
+
+    src/app/features/dashboard-super-admin/
+components/teacher-management/teacher-manag
+ement.component.ts:13:15:
+[37m      13 Ôöé   templateUrl: [32m'./te
+acher-management.component.html'[37m,
+         ÔòÁ                [32m~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33mÔû▓ 
+[43;33m[[43;30mWARNING[43;33m][0m 
+[1mNG8107: The left side of this optional 
+chain operation does not include 'null' or 
+'undefined' in its type, therefore the 
+'?.' operator can be safely removed.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard-super-admin/
+components/teacher-management/teacher-manag
+ement.component.html:79:46:
+[37m      79 Ôöé                         
+{{ t.prenom?.[0] }}{{ [32mt.nom?.[0][37m 
+}}
+         ÔòÁ                               
+                [32m~~~~~~~~~~[0m
+
+  Warning occurs in the template of 
+component TeacherManagementComponent.
+
+    src/app/features/dashboard-super-admin/
+components/teacher-management/teacher-manag
+ement.component.ts:13:15:
+[37m      13 Ôöé   templateUrl: [32m'./te
+acher-management.component.html'[37m,
+         ÔòÁ                [32m~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33mÔû▓ 
+[43;33m[[43;30mWARNING[43;33m][0m 
+[1mNG8107: The left side of this optional 
+chain operation does not include 'null' or 
+'undefined' in its type, therefore the 
+'?.' operator can be safely removed.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard-super-admin/
+components/teacher-management/teacher-manag
+ement.component.html:131:27:
+[37m      131 Ôöé                         
+{{ [32mt.prenom?.[0][37m }}{{ t.nom?.[0] 
+}}
+          ÔòÁ                            
+[32m~~~~~~~~~~~~~[0m
+
+  Warning occurs in the template of 
+component TeacherManagementComponent.
+
+    src/app/features/dashboard-super-admin/
+components/teacher-management/teacher-manag
+ement.component.ts:13:15:
+[37m      13 Ôöé   templateUrl: [32m'./te
+acher-management.component.html'[37m,
+         ÔòÁ                [32m~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33mÔû▓ 
+[43;33m[[43;30mWARNING[43;33m][0m 
+[1mNG8107: The left side of this optional 
+chain operation does not include 'null' or 
+'undefined' in its type, therefore the 
+'?.' operator can be safely removed.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard-super-admin/
+components/teacher-management/teacher-manag
+ement.component.html:131:46:
+[37m      131 Ôöé                         
+{{ t.prenom?.[0] }}{{ [32mt.nom?.[0][37m 
+}}
+          ÔòÁ                              
+                 [32m~~~~~~~~~~[0m
+
+  Warning occurs in the template of 
+component TeacherManagementComponent.
+
+    src/app/features/dashboard-super-admin/
+components/teacher-management/teacher-manag
+ement.component.ts:13:15:
+[37m      13 Ôöé   templateUrl: [32m'./te
+acher-management.component.html'[37m,
+         ÔòÁ                [32m~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2503: Cannot find namespace 
+'jasmine'.[0m [1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/features/components/courses/cou
+rses.spec.ts:15:25:
+[37m      15 Ôöé   let mockCourseService: 
+[32mjasmine[37m.SpyObj<CourseService>;
+         ÔòÁ                          
+[32m~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2503: Cannot find namespace 
+'jasmine'.[0m [1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/features/components/courses/cou
+rses.spec.ts:16:25:
+[37m      16 Ôöé   let mockLessonService: 
+[32mjasmine[37m.SpyObj<LessonService>;
+         ÔòÁ                          
+[32m~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2503: Cannot find namespace 
+'jasmine'.[0m [1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/features/components/courses/cou
+rses.spec.ts:17:23:
+[37m      17 Ôöé   let mockAuthService: 
+[32mjasmine[37m.SpyObj<AuthService>;
+         ÔòÁ                        
+[32m~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2304: Cannot find name 
+'jasmine'.[0m [1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/features/components/courses/cou
+rses.spec.ts:20:24:
+[37m      20 Ôöé     mockCourseService = 
+[32mjasmine[37m.createSpyObj('CourseServic
+e', ['ge...
+         ÔòÁ                         
+[32m~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2304: Cannot find name 
+'jasmine'.[0m [1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/features/components/courses/cou
+rses.spec.ts:21:24:
+[37m      21 Ôöé     mockLessonService = 
+[32mjasmine[37m.createSpyObj('LessonServic
+e', ['ge...
+         ÔòÁ                         
+[32m~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2304: Cannot find name 
+'jasmine'.[0m [1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/features/components/courses/cou
+rses.spec.ts:22:22:
+[37m      22 Ôöé     mockAuthService = [3
+2mjasmine[37m.createSpyObj('AuthService', 
+['curren...
+         ÔòÁ                       
+[32m~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2551: Property 'toBeFalse' does not 
+exist on type 'Assertion<boolean>'. Did 
+you mean 'toBeFalsy'?[0m [1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/features/components/courses/cou
+rses.spec.ts:87:34:
+[37m      87 Ôöé     expect(component.isLo
+ading()).[32mtoBeFalse[37m();
+         ÔòÁ                               
+    [32m~~~~~~~~~[0m
+
+  'toBeFalsy' is declared here.
+
+    node_modules/@vitest/expect/dist/index.
+d.ts:334:1:
+[37m      334 Ôöé   [32mtoBeFalsy[37m: 
+() => void;
+          ÔòÁ   [32m~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2551: Property 'toBeFalse' does not 
+exist on type 'Assertion<boolean>'. Did 
+you mean 'toBeFalsy'?[0m [1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/features/components/courses/cou
+rses.spec.ts:120:50:
+[37m      120 Ôöé     expect(component.exp
+andedLessons().has('c1')).[32mtoBeFalse[3
+7m();
+          ÔòÁ                              
+                     [32m~~~~~~~~~[0m
+
+  'toBeFalsy' is declared here.
+
+    node_modules/@vitest/expect/dist/index.
+d.ts:334:1:
+[37m      334 Ôöé   [32mtoBeFalsy[37m: 
+() => void;
+          ÔòÁ   [32m~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2305: Module '"./home"' has no 
+exported member 'Home'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/components/home/home.s
+pec.ts:3:9:
+[37m      3 Ôöé import { [32mHome[37m } 
+from './home';
+        ÔòÁ          [32m~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2305: Module '"./login"' has no 
+exported member 'Login'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/components/login/login
+.spec.ts:3:9:
+[37m      3 Ôöé import { [32mLogin[37m 
+} from './login';
+        ÔòÁ          [32m~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2724: '"./dashboard-super-admin"' 
+has no exported member named 
+'DashboardSuperAdmin'. Did you mean 
+'dashboardSuperAdmin'?[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard-super-admin/
+dashboard-super-admin.spec.ts:3:9:
+[37m      3 Ôöé import { 
+[32mDashboardSuperAdmin[37m } from 
+'./dashboard-super-admin';
+        ÔòÁ          
+[32m~~~~~~~~~~~~~~~~~~~[0m
+
+  'dashboardSuperAdmin' is declared here.
+
+    src/app/features/dashboard-super-admin/
+dashboard-super-admin.ts:52:13:
+[37m      52 Ôöé export class 
+[32mdashboardSuperAdmin[37m implements 
+OnInit, OnDestroy {
+         ÔòÁ              
+[32m~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2741: Property 'photoUrl' is missing 
+in type '{ id: string; nom: string; 
+prenom: string; email: string; telephone: 
+string; section: Section.HOMME; role: 
+Role.ADMIN_SECTION; createdAt: string; 
+dateNaissance: string; }' but required in 
+type 'UserResponse'.[0m [1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/features/services/adminService/
+admin.service.spec.ts:45:10:
+[37m      45 Ôöé     const 
+[32mmockUserResponse[37m: UserResponse = 
+{
+         ÔòÁ           
+[32m~~~~~~~~~~~~~~~~[0m
+
+  'photoUrl' is declared here.
+
+    src/app/core/models/users/userResponse.
+module.ts:13:2:
+[37m      13 Ôöé   [32mphotoUrl[37m: 
+string | null;
+         ÔòÁ   [32m~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2739: Type '{ nom: string; prenom: 
+string; email: string; password: string; 
+}' is missing the following properties 
+from type 'UserCreateRequest': id, 
+createdAt[0m [1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/features/services/adminService/
+admin.service.spec.ts:69:10:
+[37m      69 Ôöé     const 
+[32mnewAdmin[37m: UserCreateRequest = {
+         ÔòÁ           [32m~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2322: Type '{ id: string; section: 
+Section.HOMME; role: Role.ADMIN_SECTION; 
+createdAt: string; password: string; 
+passwordConfirmation?: string; nom: 
+string; prenom: string; email: string; 
+telephone?: string; photoUrl?: string; 
+dateNaissance?: string; }' is not 
+assignable to type 'UserResponse'.
+  Types of property 'telephone' are 
+incompatible.
+    Type 'string | undefined' is not 
+assignable to type 'string | null'.
+      Type 'undefined' is not assignable 
+to type 'string | null'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/services/adminService/
+admin.service.spec.ts:75:10:
+[37m      75 Ôöé     const 
+[32mmockResponse[37m: UserResponse = { 
+...newAdmin, id: "2", sec...
+         ÔòÁ           
+[32m~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2322: Type 'number' is not 
+assignable to type 'string'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/services/adminService/
+admin.service.spec.ts:89:6:
+[37m      89 Ôöé       [32mid[37m: 1,
+         ÔòÁ       [32m~~[0m
+
+  The expected type comes from property 
+'id' which is declared here on type 
+'UserUpdateRequest'
+
+    src/app/core/types/userUpdateRequest.ty
+pe.ts:5:2:
+[37m      5 Ôöé   [32mid[37m: string;
+        ÔòÁ   [32m~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2739: Type '{ id: string; nom: 
+string; prenom: string; email: string; 
+section: Section.HOMME; role: 
+Role.ADMIN_SECTION; createdAt: string; }' 
+is missing the following properties from 
+type 'UserResponse': telephone, 
+dateNaissance, photoUrl[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/services/adminService/
+admin.service.spec.ts:96:10:
+[37m      96 Ôöé     const 
+[32mmockResponse[37m: UserResponse = { 
+id: "1", nom: 'Updated', ...
+         ÔòÁ           
+[32m~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 'toBeTrue' does not 
+exist on type 'Assertion<boolean>'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/services/adminService/
+admin.service.spec.ts:109:21:
+[37m      109 Ôöé       
+expect(result).[32mtoBeTrue[37m();
+          ÔòÁ                      
+[32m~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2503: Cannot find namespace 
+'jasmine'.[0m [1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/features/services/authService/a
+uth-service.spec.ts:11:17:
+[37m      11 Ôöé   let routerSpy: 
+[32mjasmine[37m.SpyObj<Router>;
+         ÔòÁ                  
+[32m~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2353: Object literal may only 
+specify known properties, and 'expiresIn' 
+does not exist in type 
+'LoginResponse'.[0m [1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/features/services/authService/a
+uth-service.spec.ts:16:4:
+[37m      16 Ôöé     [32mexpiresIn[37m: 
+3600
+         ÔòÁ     [32m~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2304: Cannot find name 
+'jasmine'.[0m [1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/features/services/authService/a
+uth-service.spec.ts:20:16:
+[37m      20 Ôöé     routerSpy = 
+[32mjasmine[37m.createSpyObj('Router', 
+['navigate']);
+         ÔòÁ                 
+[32m~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 'toBeTrue' does not 
+exist on type 'Assertion<any>'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/services/authService/a
+uth-service.spec.ts:62:26:
+[37m      62 Ôöé       
+expect(res.success).[32mtoBeTrue[37m();
+         ÔòÁ                           
+[32m~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 'toBeTrue' does not 
+exist on type 'Assertion<boolean>'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/services/classService/
+class.service.spec.ts:88:21:
+[37m      88 Ôöé       
+expect(result).[32mtoBeTrue[37m();
+         ÔòÁ                      
+[32m~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2322: Type '"BASIQUE"' is not 
+assignable to type 'CourseLevel'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/services/courseService
+/course.service.spec.ts:60:95:
+[37m      60 Ôöé ... Course', 
+description: 'Desc', isPublic: true, 
+[32mlevel[37m: 'BASIQUE' };
+         ÔòÁ                               
+                    [32m~~~~~[0m
+
+  The expected type comes from property 
+'level' which is declared here on type 
+'CourseRequest'
+
+    src/app/features/models/course/course.m
+odel.ts:10:4:
+[37m      10 Ôöé     [32mlevel[37m: 
+CourseLevel;
+         ÔòÁ     [32m~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2820: Type '"AVANCE"' is not 
+assignable to type 'CourseLevel'. Did you 
+mean '"ADVANCED"'?[0m [1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/features/services/courseService
+/course.service.spec.ts:74:79:
+[37m      74 Ôöé ...t = { title: 'Updated 
+Course', isPublic: false, [32mlevel[37m: 
+'AVANCE' };
+         ÔòÁ                               
+                     [32m~~~~~[0m
+
+  The expected type comes from property 
+'level' which is declared here on type 
+'CourseRequest'
+
+    src/app/features/models/course/course.m
+odel.ts:10:4:
+[37m      10 Ôöé     [32mlevel[37m: 
+CourseLevel;
+         ÔòÁ     [32m~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 'toBeTrue' does not 
+exist on type 'Assertion<boolean>'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/services/liveStreaming
+Service/live-streaming.service.spec.ts:60:2
+1:
+[37m      60 Ôöé       
+expect(result).[32mtoBeTrue[37m();
+         ÔòÁ                      
+[32m~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 'toBeTrue' does not 
+exist on type 'Assertion<boolean>'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/services/scheduleServi
+ce/schedule.service.spec.ts:65:18:
+[37m      65 Ôöé       
+expect(res).[32mtoBeTrue[37m();
+         ÔòÁ                   
+[32m~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 'toBeTrue' does not 
+exist on type 'Assertion<boolean>'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/services/storageServic
+e/storage.service.spec.ts:42:49:
+[37m      42 Ôöé     
+expect(req.request.body instanceof 
+FormData).[32mtoBeTrue[37m();
+         ÔòÁ                               
+                   [32m~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 'toBeTrue' does not 
+exist on type 'Assertion<any>'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/services/storageServic
+e/storage.service.spec.ts:43:41:
+[37m      43 Ôöé     expect(req.request.bo
+dy.has('file')).[32mtoBeTrue[37m();
+         ÔòÁ                               
+           [32m~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2349: This expression is not 
+callable.
+  Type 'TestContext' has no call 
+signatures.[0m [1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/features/services/streamingBrid
+ge/streaming-bridge.service.spec.ts:25:6:
+[37m      25 Ôöé       [32mdone[37m();
+         ÔòÁ       [32m~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2352: Conversion of type '{ id: 
+number; firstName: string; lastName: 
+string; }' to type 'Student' may be a 
+mistake because neither type sufficiently 
+overlaps with the other. If this was 
+intentional, convert the expression to 
+'unknown' first.
+  Type '{ id: number; firstName: string; 
+lastName: string; }' is missing the 
+following properties from type 'Student': 
+prenom, nom, email, gender, createdAt[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/services/studentServic
+e/student.service.spec.ts:28:37:
+[37m      28 Ôöé ...dent[] = [[32m{ id: 
+1, firstName: 'Ahmad', lastName: 'Ali' } 
+as Stu[37m...
+         ÔòÁ              [32m~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[
+0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2352: Conversion of type '{ id: 
+number; firstName: string; lastName: 
+string; }' to type 'Student' may be a 
+mistake because neither type sufficiently 
+overlaps with the other. If this was 
+intentional, convert the expression to 
+'unknown' first.
+  Type '{ id: number; firstName: string; 
+lastName: string; }' is missing the 
+following properties from type 'Student': 
+prenom, nom, email, gender, createdAt[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/services/studentServic
+e/student.service.spec.ts:40:33:
+[37m      40 Ôöé ...Student = [32m{ id: 
+2, firstName: 'Omar', lastName: 'Farooq' } 
+as S[37m...
+         ÔòÁ              [32m~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[
+0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2353: Object literal may only 
+specify known properties, and 'firstName' 
+does not exist in type 'Partial<Student> & 
+{ password?: string | undefined; }'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/services/studentServic
+e/student.service.spec.ts:42:21:
+[37m      42 Ôöé     service.create({ 
+[32mfirstName[37m: 'Omar' 
+}).subscribe(student => {
+         ÔòÁ                      
+[32m~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2353: Object literal may only 
+specify known properties, and 'courseId' 
+does not exist in type 
+'StudentAbsenceRequest'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/services/teacherDashbo
+ardService/teacher-dashboard.service.spec.t
+s:38:62:
+[37m      38 Ôöé ...equest = { studentId: 
+'S1', [32mcourseId[37m: 'C1', date: 
+'2023-01-01',...
+         ÔòÁ                               
+ [32m~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2353: Object literal may only 
+specify known properties, and 'grade' does 
+not exist in type 
+'StudentGradeRequest'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/services/teacherDashbo
+ardService/teacher-dashboard.service.spec.t
+s:51:76:
+[37m      51 Ôöé ...entId: 'S1', 
+courseId: 'C1', [32mgrade[37m: 18, 
+evaluationDate: '2023-0...
+         ÔòÁ                               
+  [32m~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 'grade' does not 
+exist on type 'StudentGradeResponse'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/services/teacherDashbo
+ardService/teacher-dashboard.service.spec.t
+s:56:20:
+[37m      56 Ôöé       
+expect(grade?.[32mgrade[37m).toBe(18);
+         ÔòÁ                     
+[32m~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2739: Type '{ nom: string; email: 
+string; password: string; prenom: string; 
+}' is missing the following properties 
+from type 'UserCreateRequest': id, 
+createdAt[0m [1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/features/services/teacherServic
+e/teacher.service.spec.ts:52:10:
+[37m      52 Ôöé     const 
+[32mrequest[37m: UserCreateRequest = { 
+nom: 'Ali', email: 'test@...
+         ÔòÁ           [32m~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 'toBeTrue' does not 
+exist on type 'Assertion<boolean>'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/services/teacherServic
+e/teacher.service.spec.ts:65:18:
+[37m      65 Ôöé       
+expect(res).[32mtoBeTrue[37m();
+         ÔòÁ                   
+[32m~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2305: Module '"./footer"' has no 
+exported member 'Footer'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/layouts/main-layout/components/
+footer/footer.spec.ts:3:9:
+[37m      3 Ôöé import { [32mFooter[37m 
+} from './footer';
+        ÔòÁ          [32m~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2305: Module '"./header"' has no 
+exported member 'Header'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/layouts/main-layout/components/
+header/header.spec.ts:3:9:
+[37m      3 Ôöé import { [32mHeader[37m 
+} from './header';
+        ÔòÁ          [32m~~~~~~[0m
+
+[39m[22m

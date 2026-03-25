@@ -27,6 +27,8 @@ export class ClassManagementComponent implements OnInit {
   list = signal<ClassItem[]>([]);
   gender = signal<Gender>('HOMME');
   loading = signal<boolean>(false);
+  successMessage = signal<string>('');
+  errorMessage = signal<string>('');
 
   // Create Class Modal
   showCreateModal = signal<boolean>(false);
@@ -87,8 +89,12 @@ export class ClassManagementComponent implements OnInit {
         next: (success) => {
           if (success) {
             this.list.update(items => items.filter(i => i.id !== id));
+            this.setSuccess('تم حذف الفصل بنجاح');
+          } else {
+            this.setError('تعذر حذف الفصل. قد تكون هناك بيانات مرتبطة به.');
           }
-        }
+        },
+        error: () => this.setError('حدث خطأ أثناء حذف الفصل')
       });
     }
   }
@@ -141,9 +147,15 @@ export class ClassManagementComponent implements OnInit {
           if (updated) {
             this.list.update(items => items.map(i => i.id === updated.id ? updated : i));
             this.closeCreateModal();
+            this.setSuccess('تم تعديل بيانات الفصل بنجاح');
+          } else {
+            this.setError('تعذر تعديل الفصل. تحقق من البيانات.');
           }
         },
-        error: () => this.loading.set(false)
+        error: () => {
+          this.loading.set(false);
+          this.setError('حدث خطأ أثناء تعديل الفصل');
+        }
       });
     } else {
       this.classService.create(m).subscribe({
@@ -152,9 +164,15 @@ export class ClassManagementComponent implements OnInit {
           if (newItem) {
             this.list.update(items => [...items, newItem]);
             this.closeCreateModal();
+            this.setSuccess('تم إنشاء الفصل بنجاح');
+          } else {
+            this.setError('تعذر إنشاء الفصل. تحقق من البيانات.');
           }
         },
-        error: () => this.loading.set(false)
+        error: () => {
+          this.loading.set(false);
+          this.setError('حدث خطأ أثناء إنشاء الفصل');
+        }
       });
     }
   }
@@ -202,9 +220,26 @@ export class ClassManagementComponent implements OnInit {
               : i)
           );
           this.closeAssignTeacherModal();
+          this.setSuccess('تم تحديث الأستاذ المرتبط بالفصل');
+        } else {
+          this.setError('تعذر تحديث الأستاذ للفصل');
         }
       },
-      error: () => this.assignTeacherLoading.set(false)
+      error: () => {
+        this.assignTeacherLoading.set(false);
+        this.setError('حدث خطأ أثناء تحديث الأستاذ');
+      }
     });
+  }
+
+  private setSuccess(msg: string): void {
+    this.successMessage.set(msg);
+    this.errorMessage.set('');
+    setTimeout(() => this.successMessage.set(''), 4000);
+  }
+
+  private setError(msg: string): void {
+    this.errorMessage.set(msg);
+    setTimeout(() => this.errorMessage.set(''), 5000);
   }
 }

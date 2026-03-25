@@ -1,18 +1,21 @@
-import { Component, OnInit, OnDestroy, ViewChild, ElementRef, signal, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { interval, Subscription } from 'rxjs';
+import { forkJoin } from 'rxjs';
 import { AuthService } from '@features/services/authService/auth-service';
-import { DashboardService } from '@features/services/dashboardService/dashboard.service';
 import { LiveStreamingService } from '@features/services/liveStreamingService/live-streaming.service';
 import { ScheduleService } from '@features/services/scheduleService/schedule.service';
 import { ClassService } from '@features/services/classService/class.service';
 import { TeacherService } from '@features/services/teacherService/teacher.service';
+import { StudentService } from '@features/services/studentService/student.service';
 import { CourseService } from '@features/services/courseService/course.service';
+import { AdminService } from '@features/services/adminService/admin.service';
 import { TeacherManagementComponent } from '../dashboard-super-admin/components/teacher-management/teacher-management.component';
 import { StudentManagementComponent } from '../dashboard-super-admin/components/student-management/student-management.component';
 import { ClassManagementComponent } from '../dashboard-super-admin/components/class-management/class-management.component';
+import { CourseManagementComponent } from '../dashboard-super-admin/components/course-management/course-management.component';
 import { Section } from '../dashboard-super-admin/models/dashboard-shared.models';
 import type {
     LiveSession,
@@ -24,6 +27,8 @@ import type { ScheduleSlotResponse, ScheduleSlotRequest } from '@features/models
 import type { ClassItem } from '@features/models/class/class.model';
 import type { CourseResponse, CourseRequest } from '@features/models/course/course.model';
 import type { User } from '@core/models/users/user.module';
+import { UserNotificationStore } from '@features/services/user-notification/user-notification.store';
+import { DashboardNotificationsPanelComponent } from '@features/components/dashboard-notifications-panel/dashboard-notifications-panel';
 
 @Component({
     selector: 'app-dashboard-admin',
@@ -35,12 +40,16 @@ import type { User } from '@core/models/users/user.module';
         TeacherManagementComponent,
         StudentManagementComponent,
         ClassManagementComponent,
+        CourseManagementComponent,
+        DashboardNotificationsPanelComponent,
     ],
     templateUrl: './dashboard-admin.component.html',
     styleUrls: ['./dashboard-admin.css'],
 })
 export class DashboardAdminComponent implements OnInit, OnDestroy {
     @ViewChild('studioVideo') studioVideoRef?: ElementRef<HTMLVideoElement>;
+
+    readonly notificationStore = inject(UserNotificationStore);
 
     selectedTab: string = 'dashboard';
     currentUserName = 'مشرف نظام';
@@ -72,6 +81,7 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
     studioCommentsLoading = signal(false);
     studioCommentError = signal('');
     private commentsPollSub: Subscription | null = null;
+    private studioSessionPollSub: Subscription | null = null;
 
     liveSessions = signal<LiveSession[]>([]);
     loadingLive = signal(false);
@@ -81,6 +91,7 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
     editingLiveSession = signal<LiveSession | null>(null);
     savingLive = signal(false);
     liveFilterStatus = signal<LiveSessionStatus | ''>('');
+    liveFormErrors = signal<Record<string, string>>({});
 
     liveSessionsFiltered = computed(() => {
         let sessions = this.liveSessions();
@@ -163,17 +174,30 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
     };
 
     loadingStats = signal(false);
+    profileSaving = signal(false);
+    profileError = signal('');
+    profileSuccess = signal('');
+    profileForm = {
+        prenom: '',
+        nom: '',
+        email: '',
+        telephone: '',
+        dateNaissance: '',
+        password: '',
+        passwordConfirmation: '',
+    };
 
     constructor(
         private router: Router,
         private route: ActivatedRoute,
         private authService: AuthService,
-        private dashboardService: DashboardService,
         private liveStreamingService: LiveStreamingService,
         private scheduleService: ScheduleService,
         private classService: ClassService,
         private teacherService: TeacherService,
+        private studentService: StudentService,
         private courseService: CourseService,
+        private adminService: AdminService,
     ) { }
 
     ngOnInit(): void {
@@ -190,7 +214,18 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
             this.adminSection = 'HOMME'; // Defaulting for safety
         }
 
+        this.profileForm = {
+            prenom: user?.prenom ?? '',
+            nom: user?.nom ?? '',
+            email: user?.email ?? '',
+            telephone: user?.telephone ?? '',
+            dateNaissance: (user as any)?.dateNaissance ?? '',
+            password: '',
+            passwordConfirmation: '',
+        };
+
         this.loadDashboardData();
+        this.notificationStore.loadUnreadCount();
 
         const params = this.route.snapshot.queryParamMap;
         const tab = params.get('tab');
@@ -204,6 +239,9 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
             }
             if (tab === 'courses') {
                 this.loadCoursesList();
+            }
+            if (tab === 'notifications') {
+                this.notificationStore.refresh();
             }
         }
     }
@@ -313,6 +351,7 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
             const expectedGender = this.adminSection === 'HOMME' ? 'HOMME' : 'FEMME';
             const filteredClasses = (c || []).filter((cls: ClassItem) => cls.gender === expectedGender);
             this.scheduleRooms.set(filteredClasses);
+            this.loadScheduleSlots();
         });
 
         this.teacherService.getList().subscribe(teachers => {
@@ -324,7 +363,6 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
             this.scheduleCourses.set(page?.content ?? []);
         });
 
-        this.loadScheduleSlots();
     }
 
     loadScheduleSlots(): void {
@@ -343,8 +381,18 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
                 }
             });
         } else {
-            this.scheduleSlots.set([]);
-            this.scheduleLoading.set(false);
+            this.scheduleService.getAll().subscribe({
+                next: (res) => {
+                    const allowedRoomIds = new Set(this.scheduleRooms().map(r => String(r.id)));
+                    const filtered = (res || []).filter(slot => allowedRoomIds.has(String(slot.roomId)));
+                    this.scheduleSlots.set(filtered);
+                    this.scheduleLoading.set(false);
+                },
+                error: () => {
+                    this.scheduleError.set('خطأ في جلب الجدول الزمني');
+                    this.scheduleLoading.set(false);
+                }
+            });
         }
     }
 
@@ -355,6 +403,17 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
 
     openScheduleForm(): void {
         this.scheduleError.set('');
+        const firstRoomId = this.selectedScheduleRoomId() || this.scheduleRooms()[0]?.id || '';
+        const firstCourseId = this.scheduleCourses()[0]?.id || '';
+        const firstTeacherId = this.scheduleTeachers()[0]?.id || '';
+        this.scheduleForm = {
+            dayOfWeek: 1,
+            startTime: '08:00',
+            endTime: '09:00',
+            roomId: String(firstRoomId),
+            courseId: String(firstCourseId),
+            teacherId: String(firstTeacherId),
+        };
         this.showScheduleForm.set(true);
     }
 
@@ -363,8 +422,22 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
     }
 
     saveScheduleSlot(): void {
+        if (!this.scheduleForm.roomId || !this.scheduleForm.courseId || !this.scheduleForm.teacherId) {
+            this.scheduleError.set('القاعة والمقرر والأستاذ حقول إلزامية.');
+            return;
+        }
+        if (this.scheduleForm.endTime <= this.scheduleForm.startTime) {
+            this.scheduleError.set('وقت النهاية يجب أن يكون بعد وقت البداية.');
+            return;
+        }
         this.scheduleSaving.set(true);
-        this.scheduleService.create(this.scheduleForm).subscribe({
+        this.scheduleError.set('');
+        const payload: ScheduleSlotRequest = {
+            ...this.scheduleForm,
+            startTime: this.scheduleForm.startTime.length === 5 ? `${this.scheduleForm.startTime}:00` : this.scheduleForm.startTime,
+            endTime: this.scheduleForm.endTime.length === 5 ? `${this.scheduleForm.endTime}:00` : this.scheduleForm.endTime,
+        };
+        this.scheduleService.create(payload).subscribe({
             next: () => {
                 this.scheduleSaving.set(false);
                 this.closeScheduleForm();
@@ -380,8 +453,14 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
     deleteScheduleSlot(slot: ScheduleSlotResponse): void {
         if (confirm(`حذف الحصة ${slot.courseTitle}؟`)) {
             this.scheduleService.delete(String(slot.id)).subscribe({
-                next: () => this.loadScheduleSlots(),
-                error: () => alert('خطأ في الحذف')
+                next: (ok) => {
+                    if (ok) {
+                        this.loadScheduleSlots();
+                    } else {
+                        this.scheduleError.set('تعذر حذف الحصة.');
+                    }
+                },
+                error: () => this.scheduleError.set('خطأ في حذف الحصة')
             });
         }
     }
@@ -401,7 +480,9 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
 
         obs.subscribe({
             next: (sessionsPage) => {
-                this.liveSessions.set(sessionsPage?.content || []);
+                const sessions = sessionsPage?.content || [];
+                this.liveSessions.set(sessions);
+                this.syncSelectedStudioSession(sessions);
                 this.loadingLive.set(false);
             },
             error: () => {
@@ -413,6 +494,8 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
 
     openCreateLive(): void {
         this.editingLiveSession.set(null);
+        this.liveError.set('');
+        this.liveFormErrors.set({});
         this.liveForm = {
             title: '',
             description: '',
@@ -428,6 +511,8 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
 
     openEditLive(session: LiveSession): void {
         this.editingLiveSession.set(session);
+        this.liveError.set('');
+        this.liveFormErrors.set({});
         this.liveForm = {
             title: session.title,
             description: session.description ?? '',
@@ -444,15 +529,49 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
     closeLiveForm(): void {
         this.showLiveForm.set(false);
         this.editingLiveSession.set(null);
+        this.liveFormErrors.set({});
     }
 
     saveLiveSession(): void {
+        const errors: Record<string, string> = {};
+        const streamKey = this.liveForm.streamKey?.trim();
+        const title = this.liveForm.title?.trim();
+        if (!title || title.length < 3) {
+            errors['title'] = 'العنوان مطلوب (3 أحرف على الأقل).';
+        }
+        if (!streamKey) {
+            errors['streamKey'] = 'مفتاح البث مطلوب.';
+        }
+        if (/\s/.test(streamKey)) {
+            errors['streamKey'] = 'مفتاح البث يجب ألا يحتوي على مسافات.';
+        }
+        if (!this.liveForm.scheduledStartAt) {
+            errors['scheduledStartAt'] = 'تاريخ بداية البث مطلوب.';
+        }
+        const now = Date.now();
+        const startAt = new Date(this.liveForm.scheduledStartAt).getTime();
+        if (Number.isNaN(startAt) || startAt < now - 60_000) {
+            errors['scheduledStartAt'] = 'تاريخ بداية البث غير صالح أو منتهي.';
+        }
+        if (this.liveForm.scheduledEndAt) {
+            const endAt = new Date(this.liveForm.scheduledEndAt).getTime();
+            if (!Number.isNaN(endAt) && !Number.isNaN(startAt) && endAt <= startAt) {
+                errors['scheduledEndAt'] = 'تاريخ نهاية البث يجب أن يكون بعد تاريخ البداية.';
+            }
+        }
+
+        this.liveFormErrors.set(errors);
+        if (Object.keys(errors).length > 0) {
+            this.liveError.set('يرجى تصحيح الحقول غير الصالحة.');
+            return;
+        }
         this.savingLive.set(true);
+        this.liveError.set('');
         const id = this.editingLiveSession()?.id;
 
         const op = id
-            ? this.liveStreamingService.update(String(id), this.liveForm)
-            : this.liveStreamingService.create(this.liveForm);
+            ? this.liveStreamingService.update(String(id), { ...this.liveForm, title, streamKey })
+            : this.liveStreamingService.create({ ...this.liveForm, title, streamKey });
 
         op.subscribe({
             next: () => {
@@ -486,15 +605,43 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
     }
 
     startLive(s: LiveSession): void {
-        if (confirm('بدء تشغيل الجلسة لتصبح مباشرة؟')) {
-            this.liveStreamingService.startStream(String(s.id)).subscribe(() => this.loadLiveSessions());
-        }
+        if (s.status !== 'SCHEDULED') return;
+        this.liveError.set('');
+        this.liveStreamingService.startStream(String(s.id)).subscribe({
+            next: (updated) => {
+                if (!updated) {
+                    this.liveError.set('فشل بدء البث.');
+                    return;
+                }
+                this.liveSuccess.set('تم بدء البث.');
+                this.loadLiveSessions();
+                if (this.selectedSessionForStudio()?.id === s.id) {
+                    this.selectedSessionForStudio.set(updated);
+                    this.studioSessionDetails.set(updated);
+                }
+            },
+            error: () => this.liveError.set('فشل بدء البث.'),
+        });
     }
 
     endLive(s: LiveSession): void {
-        if (confirm('إنهاء البث وإغلاق الجلسة؟')) {
-            this.liveStreamingService.endStream(String(s.id)).subscribe(() => this.loadLiveSessions());
-        }
+        if (s.status !== 'LIVE') return;
+        this.liveError.set('');
+        this.liveStreamingService.endStream(String(s.id)).subscribe({
+            next: (updated) => {
+                if (!updated) {
+                    this.liveError.set('فشل إيقاف البث.');
+                    return;
+                }
+                this.liveSuccess.set('تم إيقاف البث.');
+                this.loadLiveSessions();
+                if (this.selectedSessionForStudio()?.id === s.id) {
+                    this.selectedSessionForStudio.set(updated);
+                    this.studioSessionDetails.set(updated);
+                }
+            },
+            error: () => this.liveError.set('فشل إيقاف البث.'),
+        });
     }
 
     startLivestream(): void {
@@ -510,12 +657,9 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
         this.isStudioCameraOn.set(false);
         this.studioCameraStream.set(null);
         this.studioComments.set([]);
-
-        this.liveStreamingService.getSessionById(String(s.id)).subscribe({
-            next: (details) => this.studioSessionDetails.set(details)
-        });
-
-        this.startCommentsPolling(Number(s.id));
+        this.refreshStudioSessionDetails();
+        this.startCommentsPolling(String(s.id));
+        this.startStudioSessionPolling();
     }
 
     closeStudio(): void {
@@ -523,6 +667,7 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
         this.studioSessionDetails.set(null);
         this.stopStudioCamera();
         this.stopCommentsPolling();
+        this.stopStudioSessionPolling();
     }
 
     async startStudioCamera() {
@@ -554,7 +699,8 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
         this.isStudioCameraOn.set(false);
     }
 
-    private startCommentsPolling(sessionId: number): void {
+    private startCommentsPolling(sessionId: string): void {
+        this.stopCommentsPolling();
         this.loadComments(sessionId);
         this.commentsPollSub = interval(5000).subscribe(() => this.loadComments(sessionId));
     }
@@ -564,10 +710,48 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
         this.commentsPollSub = null;
     }
 
-    private loadComments(sessionId: number): void {
-        this.liveStreamingService.getSessionComments(String(sessionId)).subscribe({
+    private loadComments(sessionId: string): void {
+        this.liveStreamingService.getSessionComments(sessionId).subscribe({
             next: (comments) => this.studioComments.set(comments || [])
         });
+    }
+
+    private syncSelectedStudioSession(sessions: LiveSession[]): void {
+        const current = this.selectedSessionForStudio();
+        if (!current?.id) return;
+        const updated = sessions.find(s => String(s.id) === String(current.id));
+        if (updated) {
+            this.selectedSessionForStudio.set(updated);
+            this.studioSessionDetails.set(updated);
+            return;
+        }
+        this.refreshStudioSessionDetails();
+    }
+
+    private refreshStudioSessionDetails(): void {
+        const selected = this.selectedSessionForStudio();
+        if (!selected?.id) return;
+        this.liveStreamingService.getSessionById(String(selected.id)).subscribe({
+            next: (details) => {
+                if (!details) {
+                    this.liveError.set('تعذر تحديث حالة جلسة البث الحالية.');
+                    return;
+                }
+                this.selectedSessionForStudio.set(details);
+                this.studioSessionDetails.set(details);
+            }
+        });
+    }
+
+    private startStudioSessionPolling(): void {
+        this.stopStudioSessionPolling();
+        this.refreshStudioSessionDetails();
+        this.studioSessionPollSub = interval(7000).subscribe(() => this.refreshStudioSessionDetails());
+    }
+
+    private stopStudioSessionPolling(): void {
+        this.studioSessionPollSub?.unsubscribe();
+        this.studioSessionPollSub = null;
     }
 
     sendStudioChatMessage(): void {
@@ -576,31 +760,60 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
         this.liveStreamingService.addSessionComment(String(s.id), { content: this.chatMessage.trim() }).subscribe({
             next: () => {
                 this.chatMessage = '';
-                this.loadComments(Number(s.id));
+                this.loadComments(String(s.id));
             }
         });
     }
 
     loadDashboardData(): void {
         this.loadingStats.set(true);
-        this.dashboardService.getStats().subscribe({
-            next: (stats) => {
-                if (stats) {
-                    this.totalStudents.set(stats.total_students ?? 0);
-                    this.totalMaleStudents.set(stats.total_male_students ?? 0);
-                    this.totalFemaleStudents.set(stats.total_female_students ?? 0);
+        // Endpoint /dashboard/stats peut être indisponible selon le backend actuel.
+        // On calcule donc les stats depuis les ressources de base pour fiabilité.
+        forkJoin({
+            students: this.studentService.getList(),
+            teachers: this.teacherService.getList(),
+            classes: this.classService.getList(),
+        }).subscribe({
+            next: ({ students, teachers, classes }) => {
+                const normalizeGender = (value: unknown): 'HOMME' | 'FEMME' | '' => {
+                    const v = String(value ?? '').toUpperCase();
+                    if (v.includes('HOMME') || v === 'MALE' || v === 'M') return 'HOMME';
+                    if (v.includes('FEMME') || v === 'FEMALE' || v === 'F') return 'FEMME';
+                    return '';
+                };
 
-                    this.totalTeachers.set(stats.total_teachers ?? 0);
-                    this.totalMaleTeachers.set(stats.total_male_teachers ?? 0);
-                    this.totalFemaleTeachers.set(stats.total_female_teachers ?? 0);
+                const maleStudents = (students || []).filter((s: any) => normalizeGender(s?.gender ?? s?.section) === 'HOMME').length;
+                const femaleStudents = (students || []).filter((s: any) => normalizeGender(s?.gender ?? s?.section) === 'FEMME').length;
+                const maleTeachers = (teachers || []).filter((t: any) => normalizeGender(t?.gender ?? t?.section) === 'HOMME').length;
+                const femaleTeachers = (teachers || []).filter((t: any) => normalizeGender(t?.gender ?? t?.section) === 'FEMME').length;
+                const maleClasses = (classes || []).filter((c: any) => normalizeGender(c?.gender ?? c?.section) === 'HOMME').length;
+                const femaleClasses = (classes || []).filter((c: any) => normalizeGender(c?.gender ?? c?.section) === 'FEMME').length;
 
-                    this.totalClasses.set(stats.total_classes ?? 0);
-                    this.totalClassesMale.set(stats.total_classes_male ?? 0);
-                    this.totalClassesFemale.set(stats.total_classes_female ?? 0);
-                }
+                this.totalStudents.set((students || []).length);
+                this.totalMaleStudents.set(maleStudents);
+                this.totalFemaleStudents.set(femaleStudents);
+
+                this.totalTeachers.set((teachers || []).length);
+                this.totalMaleTeachers.set(maleTeachers);
+                this.totalFemaleTeachers.set(femaleTeachers);
+
+                this.totalClasses.set((classes || []).length);
+                this.totalClassesMale.set(maleClasses);
+                this.totalClassesFemale.set(femaleClasses);
                 this.loadingStats.set(false);
             },
-            error: () => this.loadingStats.set(false),
+            error: () => {
+                this.totalStudents.set(0);
+                this.totalMaleStudents.set(0);
+                this.totalFemaleStudents.set(0);
+                this.totalTeachers.set(0);
+                this.totalMaleTeachers.set(0);
+                this.totalFemaleTeachers.set(0);
+                this.totalClasses.set(0);
+                this.totalClassesMale.set(0);
+                this.totalClassesFemale.set(0);
+                this.loadingStats.set(false);
+            },
         });
     }
 
@@ -615,6 +828,11 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
         if (tab === 'schedule') this.loadScheduleData();
         if (tab === 'courses') this.loadCoursesList();
         if (tab === 'live-stream') this.loadLiveSessions();
+        if (tab === 'notifications') this.notificationStore.refresh();
+    }
+
+    goToNewCourseCreator(): void {
+        this.router.navigate(['/courses/create']);
     }
 
     logout(): void {
@@ -622,9 +840,60 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
         this.router.navigate(['/auth/login']);
     }
 
+    saveProfile(): void {
+        const currentUser = this.authService.currentUser();
+        const userId = currentUser?.id;
+        if (!userId) {
+            this.profileError.set('تعذر تحديد حساب المشرف الحالي.');
+            return;
+        }
+        if (this.profileForm.password && this.profileForm.password !== this.profileForm.passwordConfirmation) {
+            this.profileError.set('تأكيد كلمة المرور غير مطابق.');
+            return;
+        }
+        this.profileSaving.set(true);
+        this.profileError.set('');
+        this.profileSuccess.set('');
+        this.adminService.update({
+            id: userId,
+            user: {
+                prenom: this.profileForm.prenom.trim(),
+                nom: this.profileForm.nom.trim(),
+                email: this.profileForm.email.trim(),
+                telephone: this.profileForm.telephone.trim() || undefined,
+                dateNaissance: this.profileForm.dateNaissance || undefined,
+            },
+            password: this.profileForm.password || undefined,
+            passwordConfirmation: this.profileForm.passwordConfirmation || undefined,
+        }).subscribe({
+            next: (updated) => {
+                this.profileSaving.set(false);
+                this.profileSuccess.set('تم تحديث الملف الشخصي بنجاح.');
+                const merged = {
+                    ...currentUser,
+                    prenom: updated?.prenom ?? this.profileForm.prenom.trim(),
+                    nom: updated?.nom ?? this.profileForm.nom.trim(),
+                    email: updated?.email ?? this.profileForm.email.trim(),
+                    telephone: updated?.telephone ?? this.profileForm.telephone.trim(),
+                    dateNaissance: updated?.dateNaissance ?? this.profileForm.dateNaissance,
+                };
+                localStorage.setItem('auth_user', JSON.stringify(merged));
+                this.authService.currentUser.set(merged as any);
+                this.currentUserName = `${merged.prenom ?? ''} ${merged.nom ?? ''}`.trim() || merged.email || this.currentUserName;
+                this.profileForm.password = '';
+                this.profileForm.passwordConfirmation = '';
+            },
+            error: () => {
+                this.profileSaving.set(false);
+                this.profileError.set('فشل تحديث الملف الشخصي.');
+            }
+        });
+    }
+
     ngOnDestroy(): void {
         this.stopStudioCamera();
         this.stopCommentsPolling();
+        this.stopStudioSessionPolling();
     }
 
     toggleSidebar(): void {

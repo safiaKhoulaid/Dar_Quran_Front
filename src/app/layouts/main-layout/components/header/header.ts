@@ -62,11 +62,7 @@ export class HeaderComponent {
 
   navItems = [
     { label: 'الرئيسية', link: '/' },
-    { label: 'البث المباشر', link: '/live' },
-    { label: 'إدارة البث', link: '/live/admin' },
     { label: 'الدورات', link: '/courses' },
-    { label: 'المعلمون', link: '/tutors' },
-    { label: 'إضافة دورة', link: '/courses/create' },
     { label: 'من نحن', link: '/about' },
     { label: 'اتصل بنا', link: '/contact' }
   ];

@@ -11,6 +11,9 @@ import {
     FormControl,
     Validators,
 } from '@angular/forms';
+import { CourseService } from '@features/services/courseService/course.service';
+import { StorageService } from '@features/services/storageService/storage.service';
+import { CourseRequest, CourseResponse } from '@features/models/course/course.model';
 
 interface Resource {
     id: string;
@@ -34,7 +37,7 @@ interface Course {
     description: string;
     miniature?: string;
     isPublic: boolean;
-    level: 'beginner' | 'intermediate' | 'advanced';
+    level: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
     lessons: Lesson[];
 }
 
@@ -50,13 +53,21 @@ export class CreateCourseComponent implements OnInit {
     courses: Course[] = [];
     thumbnailPreview: string | null = null;
     successMessage = '';
+    errorMessage = '';
+    uploadingThumbnail = false;
+    creatingCourse = false;
+    uploadingResourceKeys = new Set<string>();
 
-    constructor(private fb: FormBuilder) {
+    constructor(
+        private fb: FormBuilder,
+        private courseService: CourseService,
+        private storageService: StorageService,
+    ) {
         this.initializeForm();
     }
 
     ngOnInit() {
-        this.loadCoursesFromLocalStorage();
+        this.loadCourses();
     }
 
     initializeForm() {
@@ -66,7 +77,7 @@ export class CreateCourseComponent implements OnInit {
             description: ['', [Validators.required, Validators.minLength(10)]],
             miniature: [''],
             isPublic: [true],
-            level: ['beginner', Validators.required],
+            level: ['BEGINNER', Validators.required],
             lessons: this.fb.array([]),
         });
     }
@@ -126,6 +137,34 @@ export class CreateCourseComponent implements OnInit {
 
     removeResource(lessonIndex: number, resourceIndex: number) {
         this.getResourcesArray(lessonIndex).removeAt(resourceIndex);
+        this.uploadingResourceKeys.delete(this.resourceKey(lessonIndex, resourceIndex));
+    }
+
+    onResourceFileSelect(lessonIndex: number, resourceIndex: number, event: Event) {
+        const input = event.target as HTMLInputElement;
+        const file = input.files?.[0];
+        if (!file) return;
+
+        const key = this.resourceKey(lessonIndex, resourceIndex);
+        this.uploadingResourceKeys.add(key);
+        this.errorMessage = '';
+        this.getResourceControl(lessonIndex, resourceIndex, 'name').setValue(
+            this.getResourceControl(lessonIndex, resourceIndex, 'name').value || file.name
+        );
+        this.storageService.upload(file, 'lesson-resources').subscribe({
+            next: (res) => {
+                this.getResourceControl(lessonIndex, resourceIndex, 'url').setValue(res.url);
+                this.uploadingResourceKeys.delete(key);
+            },
+            error: () => {
+                this.uploadingResourceKeys.delete(key);
+                this.errorMessage = 'فشل رفع أحد ملفات الموارد.';
+            }
+        });
+    }
+
+    isResourceUploading(lessonIndex: number, resourceIndex: number): boolean {
+        return this.uploadingResourceKeys.has(this.resourceKey(lessonIndex, resourceIndex));
     }
 
     // ─── Thumbnail ──────────────────────────────────────────
@@ -134,12 +173,25 @@ export class CreateCourseComponent implements OnInit {
         const input = event.target as HTMLInputElement;
         const file = input.files?.[0];
         if (file) {
+            this.uploadingThumbnail = true;
+            this.errorMessage = '';
             const reader = new FileReader();
             reader.onload = (e) => {
                 this.thumbnailPreview = e.target?.result as string;
-                this.courseForm.patchValue({ miniature: this.thumbnailPreview });
             };
             reader.readAsDataURL(file);
+            this.storageService.upload(file, 'course-thumbnails').subscribe({
+                next: (res) => {
+                    this.courseForm.patchValue({ miniature: res.url });
+                    this.uploadingThumbnail = false;
+                },
+                error: () => {
+                    this.uploadingThumbnail = false;
+                    this.errorMessage = 'فشل رفع الصورة المصغرة. حاول مرة أخرى.';
+                    this.thumbnailPreview = null;
+                    this.courseForm.patchValue({ miniature: '' });
+                }
+            });
         }
     }
 
@@ -163,44 +215,89 @@ export class CreateCourseComponent implements OnInit {
 
     onSubmit() {
         if (this.courseForm.valid && this.lessonsArray.length > 0) {
-            const course: Course = { id: this.generateId(), ...this.courseForm.value };
-            this.courses = [...this.courses, course];
-            this.saveCoursesToLocalStorage();
-            this.successMessage = 'تم إنشاء الدورة بنجاح!';
-            setTimeout(() => {
-                this.successMessage = '';
-                this.resetForm();
-            }, 3000);
+            if (this.uploadingThumbnail) {
+                this.errorMessage = 'يرجى انتظار اكتمال رفع الصورة المصغرة.';
+                return;
+            }
+            if (this.uploadingResourceKeys.size > 0) {
+                this.errorMessage = 'يرجى انتظار اكتمال رفع ملفات الموارد.';
+                return;
+            }
+            this.creatingCourse = true;
+            this.errorMessage = '';
+            const payload: CourseRequest = {
+                title: this.courseForm.value.title,
+                slug: this.courseForm.value.slug,
+                description: this.courseForm.value.description,
+                miniature: this.courseForm.value.miniature,
+                isPublic: this.courseForm.value.isPublic,
+                level: this.courseForm.value.level,
+                status: 'PUBLISHED',
+            };
+            this.courseService.create(payload).subscribe({
+                next: (created: CourseResponse) => {
+                    const course: Course = {
+                        ...created,
+                        description: created.description ?? '',
+                        lessons: this.courseForm.value.lessons ?? [],
+                    } as Course;
+                    this.courses = [course, ...this.courses];
+                    this.creatingCourse = false;
+                    this.successMessage = 'تم إنشاء الدورة بنجاح!';
+                    setTimeout(() => {
+                        this.successMessage = '';
+                        this.resetForm();
+                    }, 2500);
+                },
+                error: () => {
+                    this.creatingCourse = false;
+                    this.errorMessage = 'حدث خطأ أثناء إنشاء الدورة.';
+                }
+            });
         } else {
             this.courseForm.markAllAsTouched();
         }
     }
 
     resetForm() {
-        this.courseForm.reset({ isPublic: true, level: 'beginner' });
+        this.courseForm.reset({ isPublic: true, level: 'BEGINNER' });
         this.lessonsArray.clear();
         this.thumbnailPreview = null;
     }
 
-    // ─── Local storage ──────────────────────────────────────
-
-    saveCoursesToLocalStorage() {
-        localStorage.setItem('courses', JSON.stringify(this.courses));
-    }
-
-    loadCoursesFromLocalStorage() {
-        const stored = localStorage.getItem('courses');
-        this.courses = stored ? JSON.parse(stored) : [];
+    loadCourses() {
+        this.courseService.getAll(0, 100).subscribe({
+            next: (page) => {
+                this.courses = (page.content ?? []).map(c => ({
+                    ...c,
+                    description: c.description ?? '',
+                    lessons: [],
+                } as Course));
+            },
+            error: () => {
+                this.courses = [];
+            }
+        });
     }
 
     deleteCourse(courseId: string) {
-        this.courses = this.courses.filter(c => c.id !== courseId);
-        this.saveCoursesToLocalStorage();
+        this.courseService.delete(courseId).subscribe({
+            next: () => {
+                this.courses = this.courses.filter(c => c.id !== courseId);
+            },
+            error: () => {
+                this.errorMessage = 'تعذر حذف الدورة.';
+            }
+        });
     }
 
     // ─── Utils ──────────────────────────────────────────────
 
     generateId(): string {
         return 'id_' + Math.random().toString(36).substring(2, 11);
+    }
+
+    private resourceKey(lessonIndex: number, resourceIndex: number): string {
+        return `${lessonIndex}-${resourceIndex}`;
     }
 }

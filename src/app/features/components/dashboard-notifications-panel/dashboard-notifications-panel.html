@@ -1,0 +1,51 @@
+<div class="dnp" dir="rtl">
+  <div class="dnp-header">
+    <h2 class="dnp-title">الإشعارات</h2>
+    @if (storeRef.unreadCount() > 0) {
+      <button type="button" class="dnp-btn-all" (click)="markAllRead()">
+        تحديد الكل كمقروء
+      </button>
+    }
+  </div>
+
+  @if (storeRef.loading()) {
+    <p class="dnp-muted">جاري التحميل…</p>
+  }
+
+  @if (storeRef.error()) {
+    <p class="dnp-error">{{ storeRef.error() }}</p>
+  }
+
+  @if (!storeRef.loading() && !storeRef.error() && storeRef.items().length === 0) {
+    <p class="dnp-muted">لا توجد إشعارات حالياً.</p>
+  }
+
+  <ul class="dnp-list" role="list">
+    @for (n of storeRef.items(); track n.id) {
+      <li>
+        <button
+          type="button"
+          class="dnp-item"
+          [class.dnp-item-unread]="!n.read"
+          (click)="onItemClick(n)"
+        >
+          <span class="dnp-badge" [attr.data-type]="n.type">{{ typeLabel(n.type) }}</span>
+          <div class="dnp-body">
+            <div class="dnp-row">
+              <span class="dnp-item-title">{{ n.title }}</span>
+              <time class="dnp-date" [attr.datetime]="n.createdAt">
+                {{ n.createdAt | date: 'd MMM، HH:mm' }}
+              </time>
+            </div>
+            @if (n.body) {
+              <p class="dnp-preview">{{ n.body | slice: 0 : 160 }}{{ n.body.length > 160 ? '…' : '' }}</p>
+            }
+          </div>
+          @if (!n.read) {
+            <span class="dnp-dot" aria-hidden="true"></span>
+          }
+        </button>
+      </li>
+    }
+  </ul>
+</div>

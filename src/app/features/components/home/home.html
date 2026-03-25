@@ -2,24 +2,55 @@
 <section class="hero">
   <div class="hero-container">
     <div class="hero-content">
-      <h1 class="hero-title">تعلّم القرآن <span class="highlight">عبر الإنترنت</span></h1>
-      <p class="hero-subtitle">أتقن الدراسات القرآنية مع معلمين متخصصين. تعليم إسلامي ميسّر للأطفال والبالغين مع مدرسين
-        معتمدين.</p>
-      <div class="hero-actions">
-        <button class="btn btn-primary" routerLink="/courses">استعرض الدورات</button>
-        <button class="btn btn-secondary">ابحث عن معلم</button>
+      <h1 class="hero-title animate-fade-in-up">
+        ارتقِ في مدارج القرآن <br> <span class="highlight">برحلة تعليمية ملهمة</span>
+      </h1>
+      <p class="hero-subtitle animate-fade-in-up delay-100">
+        أتقن علوم القرآن الكريم والدراسات الإسلامية براحة تامة من منزلك، مع نخبة من خيرة المعلمين والمجازين. تجربة
+        تعليمية مبتكرة تجمع بين الأصالة والتقنية.
+      </p>
+      <div class="hero-actions animate-fade-in-up delay-200">
+        <button class="btn btn-primary btn-large cursor-pointer" routerLink="/courses">
+          <i class="fas fa-book-reader"></i> تصفح الدورات
+        </button>
+        <button class="btn btn-secondary btn-large cursor-pointer">
+          <i class="fas fa-chalkboard-teacher"></i> ابحث عن معلم
+        </button>
       </div>
     </div>
-    <div class="hero-image">
-      <div class="image-placeholder" aria-hidden="true">
-        <svg width="100%" height="100%" viewBox="0 0 400 300" fill="none">
-          <rect width="400" height="300" fill="#f0f7f3" />
-          <g opacity="0.1">
-            <circle cx="200" cy="150" r="80" fill="#6B9B7A" />
-            <circle cx="150" cy="100" r="50" fill="#6B9B7A" />
-            <circle cx="300" cy="200" r="60" fill="#6B9B7A" />
-          </g>
-          <text x="200" y="155" text-anchor="middle" font-size="60" opacity="0.25">📖</text>
+
+    <div class="hero-image-wrapper animate-slide-in-right delay-300">
+      <div class="image-glow"></div>
+
+      <div class="hero-badge badge-1">
+        <i class="fas fa-star text-amber-500"></i>
+        <span>رضا تام للمتعلمين</span>
+      </div>
+
+      <div class="hero-badge badge-2">
+        <i class="fas fa-award text-amber-500"></i>
+        <span>معلمين معتمدين</span>
+      </div>
+
+      <div class="image-placeholder floating glass-panel">
+        <svg class="svg-art" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="200" cy="150" r="140" fill="url(#grad1)" opacity="0.3" />
+          <path d="M120 180 L200 110 L280 180 Z" fill="url(#grad2)" opacity="0.5" />
+          <rect x="180" y="160" width="40" height="60" rx="20" fill="#14B8A6" opacity="0.8" />
+          <circle cx="200" cy="120" r="30" fill="#F59E0B" />
+          <text x="50%" y="60%" dominant-baseline="middle" text-anchor="middle" font-size="64" font-family="Arial"
+            opacity="0.9">📖</text>
+
+          <defs>
+            <radialGradient id="grad1" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#14B8A6" />
+              <stop offset="100%" stop-color="#115E59" stop-opacity="0" />
+            </radialGradient>
+            <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#F59E0B" />
+              <stop offset="100%" stop-color="#14B8A6" />
+            </linearGradient>
+          </defs>
         </svg>
       </div>
     </div>
@@ -29,10 +60,12 @@
 <!-- قسم الإحصاءات -->
 <section class="stats-section">
   <div class="stats-container">
-    <h2 class="section-title">لماذا تختار دار القرآن؟</h2>
     <div class="stats-grid">
       @for (stat of stats; track stat.label) {
-      <div class="stat-card">
+      <div class="stat-card glass-panel animate-fade-scale delay-200">
+        <div class="stat-icon-wrapper">
+          <i class="fas fa-chart-line"></i>
+        </div>
         <div class="stat-number">{{ stat.number }}</div>
         <div class="stat-label">{{ stat.label }}</div>
       </div>
@@ -44,13 +77,14 @@
 <!-- قسم الدورات المميزة -->
 <section class="courses-section">
   <div class="courses-container">
-    <div class="section-header">
+    <div class="section-header animate-fade-in-up">
       <h2 class="section-title">الدورات المميزة</h2>
-      <p class="section-subtitle">دورات شاملة مصمَّمة لجميع المستويات</p>
+      <p class="section-subtitle">برامج تعليمية متكاملة مصممة بعناية لتناسب مختلف الأعمار والمستويات</p>
     </div>
+
     <div class="courses-grid">
       @for (course of courses; track course.title) {
-      <div class="course-card">
+      <div class="course-card animate-fade-in-up delay-200">
         <div class="course-image">
           <img [src]="course.image" [alt]="course.title" loading="lazy">
           <span class="course-level">{{ course.level }}</span>
@@ -59,15 +93,21 @@
           <h3 class="course-title">{{ course.title }}</h3>
           <p class="course-desc">{{ course.description }}</p>
           <div class="course-meta">
-            <span class="lesson-count">{{ course.lessons }} درسًا</span>
+            <span><i class="fas fa-book-open"></i> {{ course.lessons }} درسًا</span>
+            <span><i class="fas fa-clock"></i> مرنة</span>
           </div>
           <div class="course-footer">
             <span class="course-price">{{ course.price }}</span>
-            <button class="btn-outline">التسجيل الآن</button>
+            <button class="btn btn-outline">تفاصيل الدورة</button>
           </div>
         </div>
       </div>
       }
+    </div>
+
+    <div class="text-center mt-12 animate-fade-in-up delay-400">
+      <button class="btn btn-primary" routerLink="/courses">عرض كل الدورات <i
+          class="fas fa-arrow-left mr-2"></i></button>
     </div>
   </div>
 </section>
@@ -75,37 +115,37 @@
 <!-- قسم مزايانا -->
 <section class="benefits-section">
   <div class="benefits-container">
-    <h2 class="section-title">كيف يعمل دار القرآن؟</h2>
+    <div class="section-header animate-fade-in-up">
+      <h2 class="section-title">كيف تبدأ رحلتك؟</h2>
+      <p class="section-subtitle">خطوات بسيطة تفصلك عن حفظ وتلاوة كتاب الله</p>
+    </div>
+
     <div class="benefits-grid">
-      <div class="benefit-card">
-        <div class="benefit-icon" aria-hidden="true">
-          <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-            <circle cx="24" cy="24" r="20" fill="#f0f7f3" stroke="#6B9B7A" stroke-width="2" />
-            <text x="24" y="29" text-anchor="middle" font-size="18" fill="#6B9B7A" font-family="Tajawal">١</text>
-          </svg>
+      <div class="benefit-card animate-fade-in-up delay-100">
+        <div class="benefit-icon">
+          <i class="fas fa-user-check"></i>
         </div>
-        <h3 class="benefit-title">اختر معلمك</h3>
-        <p class="benefit-desc">تصفّح قائمة المعلمين المؤهلين وابحث عن الشخص المناسب لأهدافك التعليمية.</p>
+        <h3 class="benefit-title">١. اختر معلمك المفضل</h3>
+        <p class="benefit-desc">تصفح نخبة من المعلمين المتخصصين واختر من يناسب أسلوبك ووقتك واحتياجاتك التعليمية بكل
+          حرية.</p>
       </div>
-      <div class="benefit-card">
-        <div class="benefit-icon" aria-hidden="true">
-          <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-            <circle cx="24" cy="24" r="20" fill="#f0f7f3" stroke="#6B9B7A" stroke-width="2" />
-            <text x="24" y="29" text-anchor="middle" font-size="18" fill="#6B9B7A" font-family="Tajawal">٢</text>
-          </svg>
+
+      <div class="benefit-card animate-fade-in-up delay-200">
+        <div class="benefit-icon">
+          <i class="far fa-calendar-alt"></i>
         </div>
-        <h3 class="benefit-title">احجز دروسًا</h3>
-        <p class="benefit-desc">احجز دروسًا مرنة في الأوقات التي تناسبك ومن أي مكان في العالم.</p>
+        <h3 class="benefit-title">٢. احجز موعدك بسهولة</h3>
+        <p class="benefit-desc">قم بحجز جلساتك في الأوقات التي تناسبك من خلال جدولة مرنة تتوافق مع التزاماتك اليومية.
+        </p>
       </div>
-      <div class="benefit-card">
-        <div class="benefit-icon" aria-hidden="true">
-          <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-            <circle cx="24" cy="24" r="20" fill="#f0f7f3" stroke="#6B9B7A" stroke-width="2" />
-            <text x="24" y="29" text-anchor="middle" font-size="18" fill="#6B9B7A" font-family="Tajawal">٣</text>
-          </svg>
+
+      <div class="benefit-card animate-fade-in-up delay-300">
+        <div class="benefit-icon">
+          <i class="fas fa-laptop-house"></i>
         </div>
-        <h3 class="benefit-title">ابدأ التعلم</h3>
-        <p class="benefit-desc">انطلق في رحلتك التعليمية الإسلامية مع توجيه ودعم من خبراء متخصصين.</p>
+        <h3 class="benefit-title">٣. انطلق في التعلم</h3>
+        <p class="benefit-desc">انضم إلى الفصول الافتراضية العالية الدقة، واستمتع بتجربة تعليمية تفاعلية تعزز من حفظك
+          وتلاوتك.</p>
       </div>
     </div>
   </div>
@@ -114,21 +154,27 @@
 <!-- قسم آراء الطلاب -->
 <section class="testimonials-section">
   <div class="testimonials-container">
-    <h2 class="section-title">ماذا يقول طلابنا؟</h2>
+    <div class="section-header animate-fade-in-up">
+      <h2 class="section-title">قالوا عن تجربتهم</h2>
+      <p class="section-subtitle">اكتشف أثر منصتنا في حياة طلابنا من مختلف أنحاء العالم</p>
+    </div>
+
     <div class="testimonials-grid">
       @for (testimonial of testimonials; track testimonial.name) {
-      <div class="testimonial-card">
+      <div class="testimonial-card animate-fade-in-up delay-200">
+        <i class="fas fa-quote-right quote-icon"></i>
         <div class="testimonial-stars" aria-label="تقييم 5 من 5">
-          <span class="star" aria-hidden="true">★</span>
-          <span class="star" aria-hidden="true">★</span>
-          <span class="star" aria-hidden="true">★</span>
-          <span class="star" aria-hidden="true">★</span>
-          <span class="star" aria-hidden="true">★</span>
+          <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+            class="fas fa-star"></i>
         </div>
         <p class="testimonial-text">«{{ testimonial.comment }}»</p>
+
         <div class="testimonial-author">
-          <strong>{{ testimonial.name }}</strong>
-          <span>{{ testimonial.role }}</span>
+          <div class="author-avatar">{{ testimonial.name.charAt(0) }}</div>
+          <div class="author-info">
+            <strong>{{ testimonial.name }}</strong>
+            <span>{{ testimonial.role }}</span>
+          </div>
         </div>
       </div>
       }
@@ -138,9 +184,12 @@
 
 <!-- قسم الدعوة للتسجيل -->
 <section class="cta-section">
-  <div class="cta-container">
-    <h2 class="cta-title">هل أنت مستعد لبدء التعلم؟</h2>
-    <p class="cta-subtitle">انضم إلى آلاف الطلاب الذين يتعلمون معنا اليوم</p>
-    <button class="btn btn-primary btn-large" routerLink="/courses">ابدأ تجربتك المجانية</button>
+  <div class="cta-container animate-fade-scale">
+    <h2 class="cta-title">هل أنت مستعد لنور يضيء دربك؟</h2>
+    <p class="cta-subtitle">انضم اليوم إلى آلاف المتعلمين وابدأ رحلتك المباركة في حفظ وفهم آيات القرآن الكريم مع نخبة
+      القراء.</p>
+    <button class="btn btn-primary btn-large hover:scale-105 transition-transform" routerLink="/signup">
+      أنشئ حسابك مجاناً الآن <i class="fas fa-chevron-left mr-2"></i>
+    </button>
   </div>
 </section>

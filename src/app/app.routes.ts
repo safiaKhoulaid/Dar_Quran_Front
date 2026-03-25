@@ -79,6 +79,11 @@ export const routes: Routes = [
     path: 'courses',
     children: [
       {
+        path: '',
+        loadComponent: () =>
+          import('./features/components/courses/courses').then((m) => m.CoursesComponent),
+      },
+      {
         path: 'create',
         loadComponent: () =>
           import('./features/components/create-course/create-course').then(
@@ -118,6 +123,9 @@ export const routes: Routes = [
       import('./features/dashboard-student/dashboard-student').then(
         (m) => m.DashboardStudentComponent
       ),
-    canActivate: [authGuard],
+    canActivate: [authGuard, roleGuard],
+    data: {
+      roles: ['ELEVE'],
+    },
   },
 ];

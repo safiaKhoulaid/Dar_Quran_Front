@@ -93,11 +93,41 @@ export class LiveStreamWatchComponent
 
   private loadSessionById(id: string): void {
     const isAuth = !!this.authService.currentUser();
-    const req$ = isAuth
-      ? this.liveStreamingService.getSessionById(id)
-      : this.liveStreamingService.getPublicSessionById(id);
+    if (isAuth) {
+      this.liveStreamingService.getSessionById(id).subscribe({
+        next: (privateSession) => {
+          if (privateSession) {
+            this.session.set(privateSession);
+            this.isLoadingSession.set(false);
+            this.scheduleInitPlayer();
+            this.startCommentsPolling(privateSession.id);
+            return;
+          }
+          // Fallback: if private endpoint doesn't return the session, try public endpoint.
+          this.liveStreamingService.getPublicSessionById(id).subscribe({
+            next: (publicSession) => {
+              if (publicSession) {
+                this.session.set(publicSession);
+                this.isLoadingSession.set(false);
+                this.scheduleInitPlayer();
+                this.startCommentsPolling(publicSession.id);
+                return;
+              }
+              this.tryLoadSessionFromList(id);
+            },
+            error: () => {
+              this.tryLoadSessionFromList(id);
+            },
+          });
+        },
+        error: () => {
+          this.tryLoadSessionFromList(id);
+        },
+      });
+      return;
+    }
 
-    req$.subscribe({
+    this.liveStreamingService.getPublicSessionById(id).subscribe({
       next: (s) => {
         this.session.set(s);
         this.isLoadingSession.set(false);
@@ -107,6 +137,26 @@ export class LiveStreamWatchComponent
           this.scheduleInitPlayer();
           this.startCommentsPolling(s.id);
         }
+      },
+      error: () => {
+        this.isLoadingSession.set(false);
+        this.error.set('حدث خطأ أثناء تحميل البث.');
+      },
+    });
+  }
+
+  private tryLoadSessionFromList(id: string): void {
+    this.liveStreamingService.getSessions(0, 200).subscribe({
+      next: (page) => {
+        const found = (page.content ?? []).find((item) => String(item.id) === String(id)) ?? null;
+        this.session.set(found);
+        this.isLoadingSession.set(false);
+        if (!found) {
+          this.error.set('لم يتم العثور على البث.');
+          return;
+        }
+        this.scheduleInitPlayer();
+        this.startCommentsPolling(found.id);
       },
       error: () => {
         this.isLoadingSession.set(false);

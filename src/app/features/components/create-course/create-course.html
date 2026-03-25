@@ -78,6 +78,11 @@
             {{ successMessage }}
         </div>
         }
+        @if (errorMessage) {
+        <div class="error-state" role="alert" aria-live="assertive">
+            {{ errorMessage }}
+        </div>
+        }
 
         <form [formGroup]="courseForm" (ngSubmit)="onSubmit()" novalidate>
 
@@ -134,9 +139,9 @@
                         <div class="select-wrapper">
                             <select id="c-level" formControlName="level" class="form-select">
                                 <option value="" disabled>اختر مستوى الدورة...</option>
-                                <option value="beginner">🟢 مبتدئ</option>
-                                <option value="intermediate">🟡 متوسط</option>
-                                <option value="advanced">🔴 متقدم</option>
+                                <option value="BEGINNER">🟢 مبتدئ</option>
+                                <option value="INTERMEDIATE">🟡 متوسط</option>
+                                <option value="ADVANCED">🔴 متقدم</option>
                             </select>
                         </div>
                     </div>
@@ -264,8 +269,19 @@
                                         <option value="PDF">📄 ملف PDF</option>
                                         <option value="VIDEO">🎥 فيديو</option>
                                     </select>
+                                    @if (getResourceType(i, j) === 'TEXT') {
                                     <input type="text" [formControl]="getResourceControl(i, j, 'url')"
-                                        class="form-input-compact" placeholder="الرابط (URL)" />
+                                        class="form-input-compact" placeholder="محتوى نصي أو رابط URL" />
+                                    } @else {
+                                    <div class="resource-upload-cell">
+                                        <input type="file" class="form-input-compact"
+                                            [accept]="getResourceType(i, j) === 'PDF' ? 'application/pdf' : 'video/*'"
+                                            (change)="onResourceFileSelect(i, j, $event)" />
+                                        @if (isResourceUploading(i, j)) {
+                                        <small class="uploading-hint">جاري الرفع...</small>
+                                        }
+                                    </div>
+                                    }
                                 </div>
 
                                 <button type="button" class="btn-remove-micro" (click)="removeResource(i, j)"
@@ -302,6 +318,9 @@
                     <button type="button" class="remove-image-btn" (click)="removeThumbnail()">حذف الصورة</button>
                 </div>
                 }
+                @if (uploadingThumbnail) {
+                <p class="resource-empty-msg">جاري رفع الصورة إلى مساحة التخزين...</p>
+                }
 
                 <input #fileInput type="file" hidden accept="image/*" (change)="onThumbnailSelect($event)" />
             </section>
@@ -310,8 +329,8 @@
             <div class="action-footer">
                 <button type="button" class="btn-ghost-light" (click)="resetForm()">إعادة تعيين</button>
                 <button type="submit" class="btn-primary-green"
-                    [disabled]="courseForm.invalid || lessonsArray.length === 0">
-                    نشر الدورة التعليمية
+                    [disabled]="courseForm.invalid || lessonsArray.length === 0 || creatingCourse || uploadingThumbnail">
+                    {{ creatingCourse ? 'جاري النشر...' : 'نشر الدورة التعليمية' }}
                 </button>
             </div>
 
@@ -336,7 +355,7 @@
                     <div class="mini-card-content">
                         <div class="card-meta">
                             <span class="card-level-badge" [class]="'lvl-' + course.level">{{ course.level ===
-                                'beginner' ? 'مبتدئ' : course.level === 'intermediate' ? 'متوسط' : 'متقدم' }}</span>
+                                'BEGINNER' ? 'مبتدئ' : course.level === 'INTERMEDIATE' ? 'متوسط' : 'متقدم' }}</span>
                             <span class="card-visibility">{{ course.isPublic ? '🌐 عام' : '🔒 خاص' }}</span>
                         </div>
                         <h3 class="card-course-title">{{ course.title }}</h3>

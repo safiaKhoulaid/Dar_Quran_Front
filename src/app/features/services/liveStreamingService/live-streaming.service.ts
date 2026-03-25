@@ -20,14 +20,27 @@ function mapSessionFromApi(raw: Record<string, unknown> | null): LiveSession | n
   if (!raw || typeof raw !== 'object') return null;
   return {
     ...raw,
-    teacherId: (raw['teacherId'] ?? raw['userId']) as string | null ?? null,
-    teacherName: (raw['teacherName'] ?? raw['userName']) as string | null ?? null,
+    teacherId: ((raw['teacherId'] ?? raw['userId']) as string | null) ?? null,
+    teacherName: ((raw['teacherName'] ?? raw['userName']) as string | null) ?? null,
   } as LiveSession;
 }
 
-function mapPageFromApi(page: { content?: unknown[];[k: string]: unknown } | null): LiveSessionPage {
-  if (!page) return { content: [], totalElements: 0, totalPages: 0, size: 0, number: 0, first: true, last: true };
-  const content = (page.content ?? []).map((c) => mapSessionFromApi(c as Record<string, unknown>)).filter((s): s is LiveSession => s != null);
+function mapPageFromApi(
+  page: { content?: unknown[]; [k: string]: unknown } | null,
+): LiveSessionPage {
+  if (!page)
+    return {
+      content: [],
+      totalElements: 0,
+      totalPages: 0,
+      size: 0,
+      number: 0,
+      first: true,
+      last: true,
+    };
+  const content = (page.content ?? [])
+    .map((c) => mapSessionFromApi(c as Record<string, unknown>))
+    .filter((s): s is LiveSession => s != null);
   return { ...page, content } as LiveSessionPage;
 }
 
@@ -42,27 +55,25 @@ export class LiveStreamingService {
   getPublicSessions(
     status: LiveSessionStatus = 'LIVE',
     page = 0,
-    size = 20
+    size = 20,
   ): Observable<LiveSessionPage> {
     const params = new HttpParams()
       .set('status', status)
       .set('page', String(page))
       .set('size', String(size));
-    return this.http
-      .get<LiveSessionPage>(`${BASE_PUBLIC}/sessions`, { params })
-      .pipe(
-        catchError(() =>
-          of({
-            content: [],
-            totalElements: 0,
-            totalPages: 0,
-            size,
-            number: page,
-            first: true,
-            last: true,
-          })
-        )
-      );
+    return this.http.get<LiveSessionPage>(`${BASE_PUBLIC}/sessions`, { params }).pipe(
+      catchError(() =>
+        of({
+          content: [],
+          totalElements: 0,
+          totalPages: 0,
+          size,
+          number: page,
+          first: true,
+          last: true,
+        }),
+      ),
+    );
   }
 
   /**
@@ -70,9 +81,9 @@ export class LiveStreamingService {
    * Backend: GET /api/live/public/sessions/{id}
    */
   getPublicSessionById(id: string): Observable<LiveSession | null> {
-    return this.http.get<LiveSession>(`${BASE_PUBLIC}/sessions/${id}`).pipe(
-      catchError(() => of(null))
-    );
+    return this.http
+      .get<LiveSession>(`${BASE_PUBLIC}/sessions/${id}`)
+      .pipe(catchError(() => of(null)));
   }
 
   /**
@@ -89,10 +100,7 @@ export class LiveStreamingService {
    * Ajouter un commentaire (accès public, authorDisplayName requis si non connecté).
    * Backend: POST /api/live/public/sessions/{id}/comments
    */
-  addPublicComment(
-    sessionId: string,
-    request: LiveCommentRequest
-  ): Observable<LiveComment | null> {
+  addPublicComment(sessionId: string, request: LiveCommentRequest): Observable<LiveComment | null> {
     return this.http
       .post<LiveComment>(`${BASE_PUBLIC}/sessions/${sessionId}/comments`, request)
       .pipe(catchError(() => of(null)));
@@ -113,64 +121,9 @@ export class LiveStreamingService {
 
   /** GET /api/live/sessions */
   getSessions(page = 0, size = 20): Observable<LiveSessionPage> {
-    const params = new HttpParams()
-      .set('page', String(page))
-      .set('size', String(size));
-    return this.http.get<{ content?: unknown[];[k: string]: unknown }>(BASE_SESSIONS, { params }).pipe(
-      map(mapPageFromApi),
-      catchError(() =>
-        of({
-          content: [],
-          totalElements: 0,
-          totalPages: 0,
-          size,
-          number: page,
-          first: true,
-          last: true,
-        })
-      )
-    );
-  }
-
-  /**
-   * GET /api/live/sessions/my-section — sessions de ma section (INTERNAL, pour élèves/profs même section).
-   */
-  getSessionsForMySection(
-    status: LiveSessionStatus = 'LIVE',
-    page = 0,
-    size = 20
-  ): Observable<LiveSessionPage> {
-    const params = new HttpParams()
-      .set('status', status)
-      .set('page', String(page))
-      .set('size', String(size));
-    return this.http.get<{ content?: unknown[];[k: string]: unknown }>(`${BASE_SESSIONS}/my-section`, { params }).pipe(
-      map(mapPageFromApi),
-      catchError(() =>
-        of({
-          content: [],
-          totalElements: 0,
-          totalPages: 0,
-          size,
-          number: page,
-          first: true,
-          last: true,
-        })
-      )
-    );
-  }
-
-  /** GET /api/live/sessions/status/{status} */
-  getSessionsByStatus(
-    status: LiveSessionStatus,
-    page = 0,
-    size = 20
-  ): Observable<LiveSessionPage> {
-    const params = new HttpParams()
-      .set('page', String(page))
-      .set('size', String(size));
+    const params = new HttpParams().set('page', String(page)).set('size', String(size));
     return this.http
-      .get<{ content?: unknown[];[k: string]: unknown }>(`${BASE_SESSIONS}/status/${status}`, { params })
+      .get<{ content?: unknown[]; [k: string]: unknown }>(BASE_SESSIONS, { params })
       .pipe(
         map(mapPageFromApi),
         catchError(() =>
@@ -182,8 +135,62 @@ export class LiveStreamingService {
             number: page,
             first: true,
             last: true,
-          })
-        )
+          }),
+        ),
+      );
+  }
+
+  /**
+   * GET /api/live/sessions/my-section — sessions de ma section (INTERNAL, pour élèves/profs même section).
+   */
+  getSessionsForMySection(
+    status: LiveSessionStatus = 'LIVE',
+    page = 0,
+    size = 20,
+  ): Observable<LiveSessionPage> {
+    const params = new HttpParams()
+      .set('status', status)
+      .set('page', String(page))
+      .set('size', String(size));
+    return this.http
+      .get<{ content?: unknown[]; [k: string]: unknown }>(`${BASE_SESSIONS}/my-section`, { params })
+      .pipe(
+        map(mapPageFromApi),
+        catchError(() =>
+          of({
+            content: [],
+            totalElements: 0,
+            totalPages: 0,
+            size,
+            number: page,
+            first: true,
+            last: true,
+          }),
+        ),
+      );
+  }
+
+  /** GET /api/live/sessions/status/{status} */
+  getSessionsByStatus(status: LiveSessionStatus, page = 0, size = 20): Observable<LiveSessionPage> {
+    const params = new HttpParams().set('page', String(page)).set('size', String(size));
+    return this.http
+      .get<{
+        content?: unknown[];
+        [k: string]: unknown;
+      }>(`${BASE_SESSIONS}/status/${status}`, { params })
+      .pipe(
+        map(mapPageFromApi),
+        catchError(() =>
+          of({
+            content: [],
+            totalElements: 0,
+            totalPages: 0,
+            size,
+            number: page,
+            first: true,
+            last: true,
+          }),
+        ),
       );
   }
 
@@ -191,7 +198,7 @@ export class LiveStreamingService {
   getSessionById(id: string): Observable<LiveSession | null> {
     return this.http.get<Record<string, unknown>>(`${BASE_SESSIONS}/${id}`).pipe(
       map(mapSessionFromApi),
-      catchError(() => of(null))
+      catchError(() => of(null)),
     );
   }
 
@@ -206,7 +213,7 @@ export class LiveStreamingService {
   delete(id: string): Observable<boolean> {
     return this.http.delete(`${BASE_SESSIONS}/${id}`).pipe(
       map(() => true),
-      catchError(() => of(false))
+      catchError(() => of(false)),
     );
   }
 
@@ -234,7 +241,7 @@ export class LiveStreamingService {
   /** POST /api/live/sessions/{id}/comments (authentifié) */
   addSessionComment(
     sessionId: string,
-    request: LiveCommentRequest
+    request: LiveCommentRequest,
   ): Observable<LiveComment | null> {
     return this.http
       .post<LiveComment>(`${BASE_SESSIONS}/${sessionId}/comments`, request)

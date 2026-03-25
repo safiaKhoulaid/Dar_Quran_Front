@@ -4,188 +4,213 @@ import {
     computed,
     inject,
     signal,
+    OnInit,
+    DestroyRef,
+    effect
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { CommonModule, DatePipe } from '@angular/common';
 import { AuthService } from '@features/services/authService/auth-service';
-import { DatePipe } from '@angular/common';
-
-export interface Notification {
-    id: number;
-    type: 'info' | 'success' | 'warning' | 'danger';
-    title: string;
-    message: string;
-    date: Date;
-    read: boolean;
-}
-
-export interface Absence {
-    id: number;
-    subject: string;
-    date: Date;
-    justified: boolean;
-    reason?: string;
-}
-
-export interface Grade {
-    subject: string;
-    icon: string;
-    coefficient: number;
-    grades: { label: string; value: number; outOf: number }[];
-}
+import { StudentDashboardService } from '@features/services/student-dashboard/student-dashboard.service';
+import { StudentDashboardSummary, StudentStatistics } from '@features/models/student/dashboard-summary.model';
+import { StudentResponse, StudentRequest, Section } from '@features/models/student/student-response.model';
+import { StudentGradeResponse } from '@features/models/student/grade.model';
+import { StudentAbsenceResponse, AbsenceStatus } from '@features/models/student/absence.model';
+import { EnrollmentResponse } from '@features/models/student/enrollment.model';
+import { ScheduleSlotResponse, RoomResponse } from '@features/models/student/schedule.model';
+import { DashboardNotificationsPanelComponent } from '@features/components/dashboard-notifications-panel/dashboard-notifications-panel';
+import { UserNotificationStore } from '@features/services/user-notification/user-notification.store';
 
 @Component({
     selector: 'app-dashboard-student',
-    imports: [ReactiveFormsModule, DatePipe],
+    imports: [ReactiveFormsModule, DatePipe, CommonModule, DashboardNotificationsPanelComponent],
     templateUrl: './dashboard-student.html',
     styleUrl: './dashboard-student.css',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DashboardStudentComponent {
+export class DashboardStudentComponent implements OnInit {
     private authService = inject(AuthService);
+    private dashboardService = inject(StudentDashboardService);
     private fb = inject(FormBuilder);
+    private destroyRef = inject(DestroyRef);
+    readonly notificationStore = inject(UserNotificationStore);
 
-    currentUser = this.authService.currentUser;
-    activeTab = signal<'profile' | 'notifications' | 'absences' | 'grades'>('profile');
+    // Signals for dashboard data
+    dashboardData = signal<StudentDashboardSummary | null>(null);
+    profile = computed(() => this.dashboardData()?.profile || null);
+    grades = computed(() => this.dashboardData()?.grades || []);
+    absences = computed(() => this.dashboardData()?.absences || []);
+    enrollments = computed(() => this.dashboardData()?.enrollments || []);
+    schedule = computed(() => this.dashboardData()?.schedule || []);
+    rooms = computed(() => this.dashboardData()?.rooms || []);
+    statistics = computed(() => this.dashboardData()?.statistics || null);
+
+    // UI state signals
+    activeTab = signal<'profile' | 'notifications' | 'absences' | 'grades' | 'enrollments' | 'schedule' | 'rooms'>('profile');
     isSidebarOpen = signal(false);
     isEditingProfile = signal(false);
     profileSaved = signal(false);
+    isLoading = signal(false);
+    error = signal<string | null>(null);
 
+    // Form for profile editing
     profileForm = this.fb.nonNullable.group({
-        prenom: [this.currentUser()?.prenom || '', Validators.required],
-        nom: [this.currentUser()?.nom || '', Validators.required],
-        email: [this.currentUser()?.email || '', [Validators.required, Validators.email]],
-        telephone: [this.currentUser()?.telephone || ''],
-        adresse: [this.currentUser()?.adresse || ''],
+        nom: ['', Validators.required],
+        prenom: ['', Validators.required],
+        email: ['', [Validators.required, Validators.email]],
+        telephone: [''],
+        section: [Section.HOMME as Section, Validators.required],
+        dateNaissance: [''],
+        photoUrl: [''],
+        adresse: this.fb.nonNullable.group({
+            rue: [''],
+            ville: [''],
+            codePostal: [''],
+            pays: ['Maroc']
+        })
     });
 
-    // ── Notifications ──
-    notifications = signal<Notification[]>([
-        {
-            id: 1,
-            type: 'info',
-            title: 'حصة جديدة مضافة',
-            message: 'تمت إضافة حصة تجويد القرآن يوم الإثنين الساعة 9:00',
-            date: new Date('2026-03-17T09:00:00'),
-            read: false,
-        },
-        {
-            id: 2,
-            type: 'warning',
-            title: 'تذكير بالدرس',
-            message: 'موعد درس التفسير غداً الساعة 14:00 — لا تتأخر!',
-            date: new Date('2026-03-16T14:00:00'),
-            read: false,
-        },
-        {
-            id: 3,
-            type: 'success',
-            title: 'نتيجة الامتحان',
-            message: 'حصلت على 18/20 في امتحان حفظ سورة البقرة. أحسنت!',
-            date: new Date('2026-03-15T10:00:00'),
-            read: true,
-        },
-        {
-            id: 4,
-            type: 'danger',
-            title: 'غياب غير مبرر',
-            message: 'سُجِّل غيابك في حصة التجويد يوم الأحد دون مبرر.',
-            date: new Date('2026-03-13T08:00:00'),
-            read: true,
-        },
-    ]);
+    unreadCount = computed(() => this.notificationStore.unreadCount());
 
-    unreadCount = computed(() => this.notifications().filter((n) => !n.read).length);
+    // Computed values for absences
+    totalAbsences = computed(() => this.statistics()?.totalAbsences || 0);
+    justifiedAbsences = computed(() => this.statistics()?.excusedAbsences || 0);
+    unjustifiedAbsences = computed(() => this.statistics()?.unexcusedAbsences || 0);
+    attendanceRate = computed(() => this.statistics()?.attendanceRate || 0);
 
-    markAllRead() {
-        this.notifications.update((list) => list.map((n) => ({ ...n, read: true })));
+    // Create effect to update form when profile data changes
+    private updateFormEffect = effect(() => {
+        const currentProfile = this.profile();
+        if (currentProfile) {
+            this.profileForm.patchValue({
+                nom: currentProfile.nom,
+                prenom: currentProfile.prenom,
+                email: currentProfile.email,
+                telephone: currentProfile.telephone || '',
+                section: currentProfile.section,
+                dateNaissance: currentProfile.dateNaissance || '',
+                photoUrl: currentProfile.photoUrl || '',
+                adresse: {
+                    rue: currentProfile.adresse?.rue || '',
+                    ville: currentProfile.adresse?.ville || '',
+                    codePostal: currentProfile.adresse?.codePostal || '',
+                    pays: currentProfile.adresse?.pays || 'Maroc'
+                }
+            });
+        }
+    });
+
+    ngOnInit() {
+        this.notificationStore.loadUnreadCount();
+        this.loadDashboardData();
     }
 
-    markRead(id: number) {
-        this.notifications.update((list) =>
-            list.map((n) => (n.id === id ? { ...n, read: true } : n))
-        );
+    loadDashboardData() {
+        this.isLoading.set(true);
+        this.error.set(null);
+
+        this.dashboardService.getDashboard()
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe({
+                next: (data) => {
+                    if (data == null) {
+                        this.error.set('Impossible de charger le tableau de bord (accès refusé ou erreur réseau).');
+                        this.dashboardData.set(null);
+                    } else {
+                        this.dashboardData.set(data);
+                    }
+                    this.isLoading.set(false);
+                },
+                error: (error) => {
+                    console.error('Error loading dashboard:', error);
+                    this.error.set('Erreur lors du chargement des données');
+                    this.isLoading.set(false);
+                }
+            });
     }
 
-    // ── Absences ──
-    absences = signal<Absence[]>([
-        { id: 1, subject: 'تجويد القرآن', date: new Date('2026-03-13'), justified: false },
-        { id: 2, subject: 'التفسير', date: new Date('2026-03-06'), justified: true, reason: 'مرض' },
-        { id: 3, subject: 'الفقه', date: new Date('2026-02-27'), justified: true, reason: 'سفر عائلي' },
-        { id: 4, subject: 'السيرة النبوية', date: new Date('2026-02-20'), justified: false },
-        { id: 5, subject: 'النحو والصرف', date: new Date('2026-02-13'), justified: true, reason: 'عذر شخصي' },
-    ]);
+    // ── Profile Management ──
+    startEdit() {
+        this.isEditingProfile.set(true);
+        this.profileSaved.set(false);
+    }
 
-    totalAbsences = computed(() => this.absences().length);
-    justifiedAbsences = computed(() => this.absences().filter((a) => a.justified).length);
-    unjustifiedAbsences = computed(() => this.absences().filter((a) => !a.justified).length);
+    cancelEdit() {
+        this.isEditingProfile.set(false);
+        const currentProfile = this.profile();
+        if (currentProfile) {
+            this.profileForm.patchValue({
+                nom: currentProfile.nom,
+                prenom: currentProfile.prenom,
+                email: currentProfile.email,
+                telephone: currentProfile.telephone || '',
+                section: currentProfile.section,
+                dateNaissance: currentProfile.dateNaissance || '',
+                photoUrl: currentProfile.photoUrl || '',
+                adresse: {
+                    rue: currentProfile.adresse?.rue || '',
+                    ville: currentProfile.adresse?.ville || '',
+                    codePostal: currentProfile.adresse?.codePostal || '',
+                    pays: currentProfile.adresse?.pays || 'Maroc'
+                }
+            });
+        }
+    }
+
+    saveProfile() {
+        if (this.profileForm.invalid) return;
+
+        this.isLoading.set(true);
+        const formValue = this.profileForm.value;
+
+        const profileData: StudentRequest = {
+            nom: formValue.nom!,
+            prenom: formValue.prenom!,
+            email: formValue.email!,
+            telephone: formValue.telephone || undefined,
+            section: formValue.section as Section,
+            dateNaissance: formValue.dateNaissance || undefined,
+            photoUrl: formValue.photoUrl || undefined,
+            adresse: formValue.adresse?.rue ? {
+                rue: formValue.adresse.rue,
+                ville: formValue.adresse.ville!,
+                codePostal: formValue.adresse.codePostal!,
+                pays: formValue.adresse.pays!
+            } : undefined
+        };
+
+        this.dashboardService.updateProfile(profileData)
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe({
+                next: (updatedProfile) => {
+                    if (updatedProfile) {
+                        // Update the profile in the dashboard data
+                        const currentData = this.dashboardData();
+                        if (currentData) {
+                            this.dashboardData.set({
+                                ...currentData,
+                                profile: updatedProfile
+                            });
+                        }
+                        this.isEditingProfile.set(false);
+                        this.profileSaved.set(true);
+                        setTimeout(() => this.profileSaved.set(false), 3000);
+                    }
+                    this.isLoading.set(false);
+                },
+                error: (error) => {
+                    console.error('Error updating profile:', error);
+                    this.error.set('Erreur lors de la mise à jour du profil');
+                    this.isLoading.set(false);
+                }
+            });
+    }
 
     // ── Grades ──
-    grades = signal<Grade[]>([
-        {
-            subject: 'تجويد القرآن',
-            icon: '📖',
-            coefficient: 4,
-            grades: [
-                { label: 'الاختبار الأول', value: 17, outOf: 20 },
-                { label: 'الاختبار الثاني', value: 19, outOf: 20 },
-                { label: 'الحضور', value: 9, outOf: 10 },
-            ],
-        },
-        {
-            subject: 'التفسير',
-            icon: '✨',
-            coefficient: 3,
-            grades: [
-                { label: 'الاختبار الأول', value: 14, outOf: 20 },
-                { label: 'الاختبار الثاني', value: 16, outOf: 20 },
-                { label: 'المشاركة', value: 8, outOf: 10 },
-            ],
-        },
-        {
-            subject: 'الفقه الإسلامي',
-            icon: '⚖️',
-            coefficient: 3,
-            grades: [
-                { label: 'الاختبار الأول', value: 15, outOf: 20 },
-                { label: 'الاختبار الثاني', value: 18, outOf: 20 },
-                { label: 'البحث', value: 9, outOf: 10 },
-            ],
-        },
-        {
-            subject: 'السيرة النبوية',
-            icon: '🌙',
-            coefficient: 2,
-            grades: [
-                { label: 'الاختبار الأول', value: 18, outOf: 20 },
-                { label: 'الاختبار الثاني', value: 20, outOf: 20 },
-                { label: 'الحضور', value: 10, outOf: 10 },
-            ],
-        },
-        {
-            subject: 'النحو والصرف',
-            icon: '📝',
-            coefficient: 2,
-            grades: [
-                { label: 'الاختبار الأول', value: 13, outOf: 20 },
-                { label: 'الاختبار الثاني', value: 15, outOf: 20 },
-                { label: 'التطبيق', value: 7, outOf: 10 },
-            ],
-        },
-    ]);
-
-    getSubjectAverage(grade: Grade): number {
-        const total = grade.grades.reduce((s, g) => s + (g.value / g.outOf) * 20, 0);
-        return Math.round((total / grade.grades.length) * 10) / 10;
-    }
-
     getOverallAverage(): number {
-        const grades = this.grades();
-        const totalWeight = grades.reduce((s, g) => s + g.coefficient, 0);
-        const weightedSum = grades.reduce(
-            (s, g) => s + this.getSubjectAverage(g) * g.coefficient,
-            0
-        );
-        return Math.round((weightedSum / totalWeight) * 10) / 10;
+        const stats = this.statistics();
+        return stats?.averageGrade || 0;
     }
 
     getGradeColor(avg: number): string {
@@ -195,45 +220,63 @@ export class DashboardStudentComponent {
         return 'grade-fail';
     }
 
-    getProgressWidth(value: number, outOf: number): string {
-        return `${(value / outOf) * 100}%`;
+    // ── Schedule ──
+    getDayName(dayOfWeek: number): string {
+        const days = ['', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+        return days[dayOfWeek] || '';
     }
 
-    // ── Profile ──
-    startEdit() {
-        this.isEditingProfile.set(true);
-        this.profileSaved.set(false);
+    formatTime(time: string | { hour?: number; minute?: number } | null | undefined): string {
+        if (time == null) return '';
+        if (typeof time === 'string') {
+            return time.length >= 5 ? time.substring(0, 5) : time;
+        }
+        const h = time.hour ?? 0;
+        const m = time.minute ?? 0;
+        return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
     }
 
-    cancelEdit() {
-        this.isEditingProfile.set(false);
-        this.profileForm.patchValue({
-            prenom: this.currentUser()?.prenom || '',
-            nom: this.currentUser()?.nom || '',
-            email: this.currentUser()?.email || '',
-        });
-    }
-
-    saveProfile() {
-        if (this.profileForm.invalid) return;
-        // In a real app, you'd call an API here
-        this.isEditingProfile.set(false);
-        this.profileSaved.set(true);
-        setTimeout(() => this.profileSaved.set(false), 3000);
-    }
-
+    // ── Helpers ──
     getInitials(): string {
-        const first = this.currentUser()?.prenom?.[0] || '';
-        const last = this.currentUser()?.nom?.[0] || '';
+        const currentProfile = this.profile();
+        const first = currentProfile?.prenom?.[0] || '';
+        const last = currentProfile?.nom?.[0] || '';
         return (first + last).toUpperCase() || 'ط';
     }
 
-    selectTab(tab: 'profile' | 'notifications' | 'absences' | 'grades') {
+    selectTab(tab: 'profile' | 'notifications' | 'absences' | 'grades' | 'enrollments' | 'schedule' | 'rooms') {
         this.activeTab.set(tab);
         this.isSidebarOpen.set(false);
+        if (tab === 'notifications') {
+            this.notificationStore.refresh();
+        }
     }
 
     toggleSidebar() {
         this.isSidebarOpen.update(v => !v);
+    }
+
+    getAbsenceStatusText(status: AbsenceStatus): string {
+        const statusMap: { [key in AbsenceStatus]: string } = {
+            [AbsenceStatus.PRESENT]: 'حاضر',
+            [AbsenceStatus.ABSENT]: 'غائب',
+            [AbsenceStatus.LATE]: 'متأخر',
+            [AbsenceStatus.EXCUSED]: 'غياب مبرر'
+        };
+        return statusMap[status] || status;
+    }
+
+    getAbsenceStatusClass(status: AbsenceStatus): string {
+        const classMap: { [key in AbsenceStatus]: string } = {
+            [AbsenceStatus.PRESENT]: 'badge-success',
+            [AbsenceStatus.ABSENT]: 'badge-danger',
+            [AbsenceStatus.LATE]: 'badge-warning',
+            [AbsenceStatus.EXCUSED]: 'badge-info'
+        };
+        return classMap[status] || '';
+    }
+
+    refreshData() {
+        this.loadDashboardData();
     }
 }

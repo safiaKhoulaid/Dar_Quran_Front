@@ -187,6 +187,18 @@
     opacity: 1;
 }
 
+.tch-nav-badge {
+    margin-inline-start: auto;
+    background: #fbbf24;
+    color: #0f172a;
+    font-size: 0.7rem;
+    font-weight: 800;
+    min-width: 1.35rem;
+    padding: 0.15rem 0.45rem;
+    border-radius: 999px;
+    line-height: 1.2;
+}
+
 .tch-logout-btn {
     display: flex;
     align-items: center;
@@ -1043,6 +1055,55 @@
     background: #eff6ff;
     color: #1e40af;
     border: 1px solid #bfdbfe;
+}
+
+/* ─── Statuts (غياب، بث، إلخ) ─── */
+.tch-status-btn {
+    display: inline-block;
+    padding: 0.25rem 0.65rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.tch-status-btn.status-present {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.tch-status-btn.status-absent {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.tch-status-btn.status-late {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.tch-status-btn.status-excused {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.tch-status-btn.status-scheduled {
+    background: #e0e7ff;
+    color: #3730a3;
+}
+
+.tch-status-btn.status-live {
+    background: #fecaca;
+    color: #b91c1c;
+}
+
+.tch-status-btn.status-ended {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.tch-status-btn.status-cancelled {
+    background: #f3f4f6;
+    color: #6b7280;
 }
 
 /* ─── Responsive ─── */

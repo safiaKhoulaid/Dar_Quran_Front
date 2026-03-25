@@ -1,8 +1,9 @@
 export interface ScheduleSlotResponse {
   id: string;
   dayOfWeek: number;
-  startTime: string;
-  endTime: string;
+  /** ISO ou objet selon Jackson */
+  startTime: string | { hour?: number; minute?: number };
+  endTime: string | { hour?: number; minute?: number };
   roomId: string;
   roomName: string;
   courseId: string;

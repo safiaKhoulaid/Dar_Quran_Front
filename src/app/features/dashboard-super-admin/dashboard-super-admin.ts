@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild, ElementRef, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -14,6 +14,7 @@ import { AdminManagementComponent } from './components/admin-management/admin-ma
 import { TeacherManagementComponent } from './components/teacher-management/teacher-management.component';
 import { StudentManagementComponent } from './components/student-management/student-management.component';
 import { ClassManagementComponent } from './components/class-management/class-management.component';
+import { CourseManagementComponent } from './components/course-management/course-management.component';
 import type {
   LiveSession,
   LiveSessionRequest,
@@ -24,6 +25,8 @@ import type { ScheduleSlotResponse, ScheduleSlotRequest } from '@features/models
 import type { ClassItem } from '@features/models/class/class.model';
 import type { CourseResponse, CourseRequest } from '@features/models/course/course.model';
 import type { User } from '@core/models/users/user.module';
+import { UserNotificationStore } from '@features/services/user-notification/user-notification.store';
+import { DashboardNotificationsPanelComponent } from '@features/components/dashboard-notifications-panel/dashboard-notifications-panel';
 
 interface AgeGroup {
   key: string;
@@ -43,12 +46,16 @@ interface AgeGroup {
     TeacherManagementComponent,
     StudentManagementComponent,
     ClassManagementComponent,
+    CourseManagementComponent,
+    DashboardNotificationsPanelComponent,
   ],
   templateUrl: './dashboard-super-admin.html',
   styleUrls: ['./dashboard-super-admin.css'],
 })
 export class dashboardSuperAdmin implements OnInit, OnDestroy {
   @ViewChild('studioVideo') studioVideoRef?: ElementRef<HTMLVideoElement>;
+
+  readonly notificationStore = inject(UserNotificationStore);
 
   selectedTab: string = 'dashboard';
   currentUserName = 'المشرف الرئيسي';
@@ -191,6 +198,7 @@ export class dashboardSuperAdmin implements OnInit, OnDestroy {
         ? `${user.prenom} ${user.nom}`
         : user?.name || user?.email || 'المشرف الرئيسي';
     this.loadDashboardData();
+    this.notificationStore.loadUnreadCount();
 
     // Récupérer le tab depuis les query params
     const params = this.route.snapshot.queryParamMap;
@@ -205,6 +213,9 @@ export class dashboardSuperAdmin implements OnInit, OnDestroy {
       }
       if (tab === 'courses') {
         this.loadCoursesList();
+      }
+      if (tab === 'notifications') {
+        this.notificationStore.refresh();
       }
     }
   }
@@ -362,6 +373,13 @@ export class dashboardSuperAdmin implements OnInit, OnDestroy {
     if (tabId === 'courses') {
       this.loadCoursesList();
     }
+    if (tabId === 'notifications') {
+      this.notificationStore.refresh();
+    }
+  }
+
+  goToNewCourseCreator(): void {
+    this.router.navigate(['/courses/create']);
   }
 
   loadScheduleData(): void {
@@ -520,6 +538,10 @@ export class dashboardSuperAdmin implements OnInit, OnDestroy {
     }
     if (!streamKey) {
       this.liveError.set('مفتاح البث مطلوب.');
+      return;
+    }
+    if (/\\s/.test(streamKey)) {
+      this.liveError.set('مفتاح البث يجب ألا يحتوي على مسافات.');
       return;
     }
     const scheduledStartAt = this.liveForm.scheduledStartAt

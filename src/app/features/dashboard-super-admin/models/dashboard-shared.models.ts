@@ -18,6 +18,8 @@ export interface Person {
 
 export interface Student extends Person {
   status: string;
+  className?: string;
+  teacherName?: string;
 }
 
 export interface ClassItem {
