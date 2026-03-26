@@ -57,7 +57,7 @@ describe('CourseService', () => {
   });
 
   it('should create a course', () => {
-    const request: CourseRequest = { title: 'New Course', description: 'Desc', isPublic: true, level: 'BASIQUE' };
+    const request: CourseRequest = { title: 'New Course', description: 'Desc', isPublic: true, level: 'BEGINNER' };
     const mockResponse: CourseResponse = { ...request, id: '3' } as CourseResponse;
 
     service.create(request).subscribe(course => {
@@ -71,7 +71,7 @@ describe('CourseService', () => {
   });
 
   it('should update a course', () => {
-    const request: CourseRequest = { title: 'Updated Course', isPublic: false, level: 'AVANCE' };
+    const request: CourseRequest = { title: 'Updated Course', isPublic: false, level: 'ADVANCED' };
     const mockResponse: CourseResponse = { ...request, id: '1' } as CourseResponse;
 
     service.update('1', request).subscribe(course => {
