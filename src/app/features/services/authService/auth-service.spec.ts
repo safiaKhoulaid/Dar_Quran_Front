@@ -15,7 +15,7 @@ describe('AuthService', () => {
   const mockLoginResponse: LoginResponse = {
     token: 'mock-token',
     refreshToken: 'mock-refresh-token',
-    expiresIn: 3600
+    email: 'test@example.com'
   };
 
   beforeEach(() => {
