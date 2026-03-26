@@ -90,6 +90,13 @@ export const routes: Routes = [
             (m) => m.CreateCourseComponent,
           ),
       },
+      {
+        path: ':id',
+        loadComponent: () =>
+          import('./features/components/course-detail/course-detail').then(
+            (m) => m.CourseDetailComponent,
+          ),
+      },
     ],
   },
   {
