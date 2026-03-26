@@ -68,30 +68,24 @@ describe('AdminService', () => {
 
   it('should create an admin', () => {
     const newAdmin: UserCreateRequest = {
-      user: {
-        id: "",
-        nom: 'New',
-        prenom: 'Admin',
-        email: 'new@example.com',
-        section: Section.HOMME,
-        role: Role.ADMIN_SECTION as any,
-        createdAt: "",
-        photoUrl: null
-      },
-      password: 'password',
+      id: '',
       nom: 'New',
       prenom: 'Admin',
-      email: 'new@example.com'
+      email: 'new@example.com',
+      createdAt: '',
+      password: 'password'
     };
-    const mockResponse: UserResponse = { 
-       id: "2", 
+    const mockResponse: UserResponse = {
+       id: "2",
        nom: 'New',
        prenom: 'Admin',
        email: 'new@example.com',
-       section: Section.HOMME, 
-       role: Role.ADMIN_SECTION, 
+       section: Section.HOMME,
+       role: Role.ADMIN_SECTION,
        createdAt: '2023-01-01',
-       photoUrl: null
+       photoUrl: null,
+       telephone: null,
+       dateNaissance: null
     };
 
     service.create(newAdmin).subscribe(response => {
@@ -113,7 +107,7 @@ describe('AdminService', () => {
         email: 'update@example.com',
       }
     };
-    const mockResponse: UserResponse = { id: "1", nom: 'Updated', prenom: 'Admin', email: 'update@example.com', section: Section.HOMME, role: Role.ADMIN_SECTION, createdAt: '2023-01-01', photoUrl: null, telephone: undefined, dateNaissance: undefined };
+    const mockResponse: UserResponse = { id: "1", nom: 'Updated', prenom: 'Admin', email: 'update@example.com', section: Section.HOMME, role: Role.ADMIN_SECTION, createdAt: '2023-01-01', photoUrl: null, telephone: null, dateNaissance: null };
 
     service.update(updateRequest).subscribe(response => {
       expect(response.nom).toBe('Updated');
