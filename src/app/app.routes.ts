@@ -44,6 +44,30 @@ export const routes: Routes = [
             (m) => m.LiveStreamWatchComponent
           ),
       },
+      {
+        path: 'courses',
+        children: [
+          {
+            path: '',
+            loadComponent: () =>
+              import('./features/components/courses/courses').then((m) => m.CoursesComponent),
+          },
+          {
+            path: 'create',
+            loadComponent: () =>
+              import('./features/components/create-course/create-course').then(
+                (m) => m.CreateCourseComponent,
+              ),
+          },
+          {
+            path: ':id',
+            loadComponent: () =>
+              import('./features/components/course-detail/course-detail').then(
+                (m) => m.CourseDetailComponent,
+              ),
+          },
+        ],
+      },
     ],
   },
   {
@@ -74,30 +98,6 @@ export const routes: Routes = [
       import('./features/components/unauthorized/unauthorized.component').then(
         (m) => m.UnauthorizedComponent,
       ),
-  },
-  {
-    path: 'courses',
-    children: [
-      {
-        path: '',
-        loadComponent: () =>
-          import('./features/components/courses/courses').then((m) => m.CoursesComponent),
-      },
-      {
-        path: 'create',
-        loadComponent: () =>
-          import('./features/components/create-course/create-course').then(
-            (m) => m.CreateCourseComponent,
-          ),
-      },
-      {
-        path: ':id',
-        loadComponent: () =>
-          import('./features/components/course-detail/course-detail').then(
-            (m) => m.CourseDetailComponent,
-          ),
-      },
-    ],
   },
   {
     path: 'dashboard-super-admin',
