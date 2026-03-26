@@ -182,7 +182,7 @@
             </section>
 
             <!-- ─────────────────── البطاقة الثانية: الدروس ──────────────────────── -->
-            <section class="form-section">
+            <section id="lessons-section" class="form-section">
                 <div class="header-action-row">
                     <div class="heading-group">
                         <h2 class="section-heading-with-icon">
@@ -328,6 +328,7 @@
             <!-- ─────────────────── الإجراءات النهائية ───────────────────────────────── -->
             <div class="action-footer">
                 <button type="button" class="btn-ghost-light" (click)="resetForm()">إعادة تعيين</button>
+                <button type="button" class="btn-ghost-light" (click)="goToCoursesPage()">عرض كل الدورات</button>
                 <button type="submit" class="btn-primary-green"
                     [disabled]="courseForm.invalid || lessonsArray.length === 0 || creatingCourse || uploadingThumbnail">
                     {{ creatingCourse ? 'جاري النشر...' : 'نشر الدورة التعليمية' }}
@@ -335,38 +336,6 @@
             </div>
 
         </form>
-
-        <!-- ════════════ دوراتي الحالية ════════════ -->
-        @if (courses.length > 0) {
-        <section class="saved-courses-area">
-            <div class="area-header">
-                <div class="area-badge">المكتبة</div>
-                <h2 class="area-title">دوراتي المسجلة</h2>
-            </div>
-
-            <div class="courses-flex-grid">
-                @for (course of courses; track course.id) {
-                <article class="course-mini-card">
-                    @if (course.miniature) {
-                    <img [src]="course.miniature" class="mini-card-thumb" alt="غلاف الدورة" />
-                    } @else {
-                    <div class="mini-card-thumb-placeholder">📚</div>
-                    }
-                    <div class="mini-card-content">
-                        <div class="card-meta">
-                            <span class="card-level-badge" [class]="'lvl-' + course.level">{{ course.level ===
-                                'BEGINNER' ? 'مبتدئ' : course.level === 'INTERMEDIATE' ? 'متوسط' : 'متقدم' }}</span>
-                            <span class="card-visibility">{{ course.isPublic ? '🌐 عام' : '🔒 خاص' }}</span>
-                        </div>
-                        <h3 class="card-course-title">{{ course.title }}</h3>
-                        <p class="card-course-info">{{ course.lessons?.length || 0 }} درس</p>
-                        <button type="button" class="btn-delete-card" (click)="deleteCourse(course.id)">حذف</button>
-                    </div>
-                </article>
-                }
-            </div>
-        </section>
-        }
 
     </main>
 </div>

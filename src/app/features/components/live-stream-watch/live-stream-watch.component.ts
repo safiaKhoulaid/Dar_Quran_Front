@@ -200,7 +200,7 @@ export class LiveStreamWatchComponent
 
   initPlayerWhenReady(): void {
     const s = this.session();
-    if (!s?.hlsPlaybackUrl) return;
+    if (!s?.hlsPlaybackUrl || s.status !== 'LIVE') return;
     const video = this.videoRef?.nativeElement;
     if (video && !this.hls) {
       this.initHls(video, s.hlsPlaybackUrl);
@@ -218,6 +218,11 @@ export class LiveStreamWatchComponent
       this.hls.attachMedia(video);
       this.hls.on(Hls.Events.ERROR, (_, data) => {
         if (data.fatal) {
+          const details = String(data.details || '');
+          if (details === 'manifestLoadError' || details === 'manifestParsingError') {
+            this.error.set('تعذر تحميل ملف البث (m3u8). تأكد أن البث بدأ فعلياً ثم أعد المحاولة.');
+            return;
+          }
           this.error.set('فشل تشغيل البث. تحقق من الرابط أو حاول لاحقاً.');
         }
       });

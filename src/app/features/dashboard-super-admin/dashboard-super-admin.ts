@@ -379,7 +379,7 @@ export class dashboardSuperAdmin implements OnInit, OnDestroy {
   }
 
   goToNewCourseCreator(): void {
-    this.router.navigate(['/courses/create']);
+    this.router.navigate(['/courses/create'], { queryParams: { step: 2 } });
   }
 
   loadScheduleData(): void {

@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { TeacherDashboardService } from './teacher-dashboard.service';
-import { StudentAbsenceRequest, StudentGradeRequest } from '@features/models/teacher-dashboard/teacher-dashboard.model';
+import { StudentAbsenceRequest, StudentGradeRequest, AbsenceStatus } from '@features/models/teacher-dashboard/teacher-dashboard.model';
 
 describe('TeacherDashboardService', () => {
   let service: TeacherDashboardService;
@@ -35,7 +35,7 @@ describe('TeacherDashboardService', () => {
   });
 
   it('should mark absence', () => {
-    const request: StudentAbsenceRequest = { studentId: 'S1', courseId: 'C1', date: '2023-01-01', roomId: 'R1' };
+    const request: StudentAbsenceRequest = { studentId: 'S1', scheduleSlotId: 'SS1', date: '2023-01-01', status: AbsenceStatus.ABSENT };
     const mockResponse = { id: 'A1', ...request };
 
     service.markAbsence(request).subscribe(absence => {
@@ -48,12 +48,12 @@ describe('TeacherDashboardService', () => {
   });
 
   it('should add a grade', () => {
-    const request: StudentGradeRequest = { studentId: 'S1', courseId: 'C1', grade: 18, evaluationDate: '2023-01-01', notes: 'Excellent' };
+    const request: StudentGradeRequest = { studentId: 'S1', courseId: 'C1', value: 18, gradeDate: '2023-01-01', comment: 'Excellent' };
     const mockResponse = { id: 'G1', ...request };
 
     service.addGrade(request).subscribe(grade => {
       expect(grade?.id).toBe('G1');
-      expect(grade?.grade).toBe(18);
+      expect(grade?.value).toBe(18);
     });
 
     const req = httpMock.expectOne('/teacher/grades');

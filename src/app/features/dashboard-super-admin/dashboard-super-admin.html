@@ -123,6 +123,10 @@
       <div class="tab-content fade-in" [class.active]="selectedTab === 'dashboard'">
         <div class="page-header">
           <h1 class="page-title">نظرة عامة</h1>
+          <button type="button" class="btn-modern btn-primary-modern" (click)="goToNewCourseCreator()">
+            <i class="fas fa-plus"></i>
+            <span>إنشاء مقرر</span>
+          </button>
         </div>
 
         <!-- Overview Cards -->
@@ -236,7 +240,7 @@
           <h1 class="page-title">المقررات</h1>
           <button type="button" class="btn-modern btn-primary-modern" (click)="goToNewCourseCreator()">
             <i class="fas fa-plus"></i>
-            <span>إنشاء مقرر بالطريقة الجديدة</span>
+            <span>إنشاء مقرر</span>
           </button>
         </div>
         <app-course-management></app-course-management>
@@ -400,14 +404,19 @@
               <i class="fas fa-plus"></i>
               <span>إنشاء جلسة</span>
             </button>
-            <button type="button" class="btn-modern btn-secondary-modern" (click)="startLivestream()">
+            <!-- <button type="button" class="btn-modern btn-secondary-modern" (click)="startLivestream()">
               <i class="fas fa-external-link-alt"></i>
               <span>مشاهدة كزائر</span>
-            </button>
+            </button> -->
           </div>
         </div>
 
         <div class="modern-card mb-8">
+          <p class="px-4 pt-3 text-xs text-slate-500 leading-relaxed border-b border-slate-50 pb-3">
+            <i class="fas fa-info-circle ml-1 text-accent"></i>
+            <strong>بدء البث</strong> يعلن الجلسة «مباشرة» للطلاب (يظهر الرابط نشطاً).
+            <strong>إيقاف البث المباشر</strong> يغلق المشاهدة ويعيد الجلسة إلى حالة منتهية.
+          </p>
           <div class="p-4 border-b border-slate-100 flex items-center justify-between">
             <div class="flex items-center gap-4">
               <span class="text-sm font-bold text-slate-600">تصفية:</span>
@@ -449,22 +458,38 @@
                   <td class="font-mono text-xs">{{ s.streamKey }}</td>
                   <td>{{ s.scheduledStartAt | date:'short' }}</td>
                   <td>{{ s.teacherName || '—' }}</td>
-                  <td class="flex gap-2">
-                    <button (click)="goToWatch(s)" class="btn-modern btn-secondary-modern py-1 px-2" title="مشاهدة"><i
-                        class="fas fa-eye"></i></button>
-                    <button (click)="goToBroadcast(s)" class="btn-modern btn-secondary-modern py-1 px-2 text-blue-600"
-                      title="بث من المتصفح"><i class="fas fa-video"></i></button>
-                    @if (s.status === 'SCHEDULED') {
-                    <button (click)="startLive(s)" class="btn-modern btn-secondary-modern py-1 px-2 text-success"
-                      title="بدء"><i class="fas fa-play"></i></button>
-                    } @else if (s.status === 'LIVE') {
-                    <button (click)="endLive(s)" class="btn-modern btn-secondary-modern py-1 px-2 text-danger"
-                      title="إيقاف"><i class="fas fa-stop"></i></button>
-                    }
-                    <button (click)="openEditLive(s)" class="btn-modern btn-secondary-modern py-1 px-2 text-indigo-600"
-                      title="تعديل"><i class="fas fa-edit"></i></button>
-                    <button (click)="deleteLive(s)" class="btn-modern btn-secondary-modern py-1 px-2 text-red-600"
-                      title="حذف"><i class="fas fa-trash"></i></button>
+                  <td>
+                    <div class="live-actions-row flex flex-wrap gap-2 items-center">
+                      <button type="button" (click)="goToWatch(s)"
+                        class="btn-modern btn-secondary-modern live-action-btn" title="مشاهدة البث">
+                        <i class="fas fa-eye"></i><span>مشاهدة</span>
+                      </button>
+                      <button type="button" (click)="goToBroadcast(s)"
+                        class="btn-modern btn-secondary-modern live-action-btn text-blue-600" title="بث من المتصفح">
+                        <i class="fas fa-video"></i><span>بث</span>
+                      </button>
+                      @if (s.status === 'SCHEDULED') {
+                      <button type="button" (click)="startLive(s)"
+                        class="btn-modern btn-secondary-modern live-action-btn text-emerald-700 border-emerald-200 bg-emerald-50/80 hover:bg-emerald-100"
+                        title="تفعيل الجلسة للطلاب كبث مباشر">
+                        <i class="fas fa-play"></i><span>بدء البث للطلاب</span>
+                      </button>
+                      } @else if (s.status === 'LIVE') {
+                      <button type="button" (click)="endLive(s)"
+                        class="btn-modern btn-secondary-modern live-action-btn text-red-700 border-red-200 bg-red-50/80 hover:bg-red-100"
+                        title="إيقاف البث وإغلاق المشاهدة للطلاب">
+                        <i class="fas fa-stop"></i><span>إيقاف البث المباشر</span>
+                      </button>
+                      }
+                      <button type="button" (click)="openEditLive(s)"
+                        class="btn-modern btn-secondary-modern live-action-btn text-indigo-600" title="تعديل الجلسة">
+                        <i class="fas fa-edit"></i><span>تعديل</span>
+                      </button>
+                      <button type="button" (click)="deleteLive(s)"
+                        class="btn-modern btn-secondary-modern live-action-btn text-red-600" title="حذف الجلسة">
+                        <i class="fas fa-trash"></i><span>حذف</span>
+                      </button>
+                    </div>
                   </td>
                 </tr>
                 }
@@ -504,16 +529,29 @@
               }
 
               @if (isStudioCameraOn()) {
-              <div class="absolute bottom-4 left-4 right-4 flex justify-between">
-                <button (click)="stopStudioCamera()" class="btn-modern btn-secondary-modern bg-white/90">إيقاف
-                  الكاميرا</button>
-                <div class="flex gap-2">
+              <div class="absolute bottom-4 left-4 right-4 flex flex-wrap gap-2 items-stretch justify-between">
+                <button type="button" (click)="stopStudioCamera()"
+                  class="btn-modern btn-secondary-modern bg-white/90 studio-control-btn">
+                  <i class="fas fa-video-slash ml-1"></i> إيقاف الكاميرا
+                </button>
+                <div class="flex flex-wrap gap-2 flex-1 justify-end min-w-[min(100%,280px)]">
                   @if (studioSession.status === 'SCHEDULED') {
-                  <button (click)="startLive(studioSession)"
-                    class="btn-modern btn-primary-modern bg-success hover:bg-emerald-600">بدء البث المباشر</button>
+                  <button type="button" (click)="startLive(studioSession)"
+                    class="btn-modern btn-secondary-modern studio-control-btn text-emerald-800 bg-emerald-100 border border-emerald-300 hover:bg-emerald-200"
+                    title="يجعل الجلسة مرئية للطلاب كبث مباشر">
+                    <i class="fas fa-play ml-1"></i> بدء البث للطلاب
+                  </button>
+                  } @else if (studioSession.status === 'LIVE') {
+                  <button type="button" (click)="endLive(studioSession)"
+                    class="btn-modern btn-secondary-modern studio-control-btn text-red-800 bg-red-100 border border-red-300 hover:bg-red-200"
+                    title="إيقاف البث وإغلاق المشاهدة">
+                    <i class="fas fa-stop ml-1"></i> إيقاف البث المباشر
+                  </button>
                   } @else {
-                  <button (click)="endLive(studioSession)"
-                    class="btn-modern btn-primary-modern bg-danger hover:bg-red-600">إنهاء البث</button>
+                  <span
+                    class="studio-control-btn inline-flex items-center justify-center px-4 rounded-xl bg-white/15 text-white/90 text-sm">
+                    <i class="fas fa-check-circle ml-1"></i> الجلسة ليست قيد البث ({{ statusLabel(studioSession.status) }})
+                  </span>
                   }
                 </div>
               </div>

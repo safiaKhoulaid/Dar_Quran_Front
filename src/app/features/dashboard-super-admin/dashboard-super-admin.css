@@ -543,6 +543,33 @@
   color: #dc2626;
 }
 
+/* Live tab — actions même gabarit (icône + libellé) */
+.live-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 2.25rem;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.live-action-btn span {
+  white-space: nowrap;
+}
+
+.studio-control-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: 2.75rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
 /* Live Studio in Dashboard */
 .studio-container {
   display: grid;

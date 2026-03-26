@@ -832,7 +832,7 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
     }
 
     goToNewCourseCreator(): void {
-        this.router.navigate(['/courses/create']);
+        this.router.navigate(['/courses/create'], { queryParams: { step: 2 } });
     }
 
     logout(): void {

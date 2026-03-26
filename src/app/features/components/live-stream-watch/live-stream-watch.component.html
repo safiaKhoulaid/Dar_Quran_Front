@@ -24,7 +24,7 @@
         <div class="video-wrapper">
           <!-- HLS Player -->
           <video #videoPlayer class="video-element" controls playsinline autoplay
-            poster="assets/images/live-placeholder.jpg"></video>
+            poster="assets/images/live-placeholder.svg"></video>
 
           @if (session()?.status !== 'LIVE') {
           <div class="stream-overlay">
@@ -158,7 +158,7 @@
       @for (s of sessions(); track s.id) {
       <div class="session-card modern-card">
         <div class="card-thumb">
-          <img src="assets/images/live-placeholder.jpg" alt="{{s.title}}" class="thumb-img">
+          <img src="assets/images/live-placeholder.svg" alt="{{s.title}}" class="thumb-img">
           <div class="status-badge live">
             @if (s.status === 'LIVE') { <span class="live-dot pulse"></span> }
             {{ s.status === 'LIVE' ? 'مباشر الآن' : (s.status === 'ENDED' ? 'منتهي' : 'مجدول') }}

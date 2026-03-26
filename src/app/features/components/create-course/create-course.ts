@@ -1,6 +1,7 @@
 import {
     ChangeDetectionStrategy,
     Component,
+    ChangeDetectorRef,
     OnInit,
 } from '@angular/core';
 import {
@@ -11,9 +12,13 @@ import {
     FormControl,
     Validators,
 } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CourseService } from '@features/services/courseService/course.service';
+import { LessonService } from '@features/services/lessonService/lesson.service';
+import { ResourceService } from '@features/services/resourceService/resource.service';
 import { StorageService } from '@features/services/storageService/storage.service';
 import { CourseRequest, CourseResponse } from '@features/models/course/course.model';
+import { concatMap, from, mapTo, of, toArray } from 'rxjs';
 
 interface Resource {
     id: string;
@@ -60,14 +65,30 @@ export class CreateCourseComponent implements OnInit {
 
     constructor(
         private fb: FormBuilder,
+        private router: Router,
+        private route: ActivatedRoute,
         private courseService: CourseService,
+        private lessonService: LessonService,
+        private resourceService: ResourceService,
         private storageService: StorageService,
+        private cdr: ChangeDetectorRef,
     ) {
         this.initializeForm();
     }
 
     ngOnInit() {
-        this.loadCourses();
+        // Si on arrive depuis le dashboard, on peut demander d'aller directement à l'étape 2 (الدروس).
+        const step = this.route.snapshot.queryParamMap.get('step');
+        if (step === '2') {
+            setTimeout(() => this.scrollToLessons(), 50);
+        }
+    }
+
+    private scrollToLessons(): void {
+        const el = document.getElementById('lessons-section');
+        if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
     }
 
     initializeForm() {
@@ -156,9 +177,10 @@ export class CreateCourseComponent implements OnInit {
                 this.getResourceControl(lessonIndex, resourceIndex, 'url').setValue(res.url);
                 this.uploadingResourceKeys.delete(key);
             },
-            error: () => {
+            error: (err) => {
                 this.uploadingResourceKeys.delete(key);
-                this.errorMessage = 'فشل رفع أحد ملفات الموارد.';
+                this.errorMessage = this.extractServerMessage(err, 'فشل رفع أحد ملفات الموارد.');
+                this.cdr.markForCheck();
             }
         });
     }
@@ -184,12 +206,17 @@ export class CreateCourseComponent implements OnInit {
                 next: (res) => {
                     this.courseForm.patchValue({ miniature: res.url });
                     this.uploadingThumbnail = false;
+                    this.cdr.markForCheck();
                 },
-                error: () => {
+                error: (err) => {
                     this.uploadingThumbnail = false;
-                    this.errorMessage = 'فشل رفع الصورة المصغرة. حاول مرة أخرى.';
+                    this.errorMessage = this.extractServerMessage(
+                        err,
+                        'فشل رفع الصورة المصغرة. حاول مرة أخرى.'
+                    );
                     this.thumbnailPreview = null;
                     this.courseForm.patchValue({ miniature: '' });
+                    this.cdr.markForCheck();
                 }
             });
         }
@@ -223,6 +250,16 @@ export class CreateCourseComponent implements OnInit {
                 this.errorMessage = 'يرجى انتظار اكتمال رفع ملفات الموارد.';
                 return;
             }
+            const lessons = this.courseForm.value.lessons ?? [];
+            const hasInvalidResource = lessons.some((lesson: any) =>
+                (lesson.resources ?? []).some((resource: any) =>
+                    !resource.name || !resource.type || !resource.url
+                )
+            );
+            if (hasInvalidResource) {
+                this.errorMessage = 'يرجى إدخال اسم المورد ورفع/إدخال الرابط لكل مورد قبل النشر.';
+                return;
+            }
             this.creatingCourse = true;
             this.errorMessage = '';
             const payload: CourseRequest = {
@@ -236,22 +273,27 @@ export class CreateCourseComponent implements OnInit {
             };
             this.courseService.create(payload).subscribe({
                 next: (created: CourseResponse) => {
-                    const course: Course = {
-                        ...created,
-                        description: created.description ?? '',
-                        lessons: this.courseForm.value.lessons ?? [],
-                    } as Course;
-                    this.courses = [course, ...this.courses];
-                    this.creatingCourse = false;
-                    this.successMessage = 'تم إنشاء الدورة بنجاح!';
-                    setTimeout(() => {
-                        this.successMessage = '';
-                        this.resetForm();
-                    }, 2500);
+                    this.persistLessonsAndResources(created.id, lessons).subscribe({
+                        next: () => {
+                            this.creatingCourse = false;
+                            this.successMessage = 'تم إنشاء الدورة والدروس والموارد بنجاح!';
+                            setTimeout(() => {
+                                this.successMessage = '';
+                                this.resetForm();
+                            }, 2500);
+                            this.cdr.markForCheck();
+                        },
+                        error: () => {
+                            this.creatingCourse = false;
+                            this.errorMessage = 'تم إنشاء الدورة لكن فشل حفظ بعض الدروس أو الموارد.';
+                            this.cdr.markForCheck();
+                        },
+                    });
                 },
                 error: () => {
                     this.creatingCourse = false;
                     this.errorMessage = 'حدث خطأ أثناء إنشاء الدورة.';
+                    this.cdr.markForCheck();
                 }
             });
         } else {
@@ -265,30 +307,8 @@ export class CreateCourseComponent implements OnInit {
         this.thumbnailPreview = null;
     }
 
-    loadCourses() {
-        this.courseService.getAll(0, 100).subscribe({
-            next: (page) => {
-                this.courses = (page.content ?? []).map(c => ({
-                    ...c,
-                    description: c.description ?? '',
-                    lessons: [],
-                } as Course));
-            },
-            error: () => {
-                this.courses = [];
-            }
-        });
-    }
-
-    deleteCourse(courseId: string) {
-        this.courseService.delete(courseId).subscribe({
-            next: () => {
-                this.courses = this.courses.filter(c => c.id !== courseId);
-            },
-            error: () => {
-                this.errorMessage = 'تعذر حذف الدورة.';
-            }
-        });
+    goToCoursesPage() {
+        this.router.navigate(['/courses']);
     }
 
     // ─── Utils ──────────────────────────────────────────────
@@ -299,5 +319,56 @@ export class CreateCourseComponent implements OnInit {
 
     private resourceKey(lessonIndex: number, resourceIndex: number): string {
         return `${lessonIndex}-${resourceIndex}`;
+    }
+
+    private extractServerMessage(err: any, fallback: string): string {
+        const status = err?.status ?? '';
+        const body = err?.error;
+
+        const serverMsg =
+            (typeof body === 'string' ? body : null) ??
+            body?.message ??
+            body?.error ??
+            err?.message ??
+            '';
+
+        if (serverMsg) {
+            return status ? `${fallback} (${status}): ${serverMsg}` : `${fallback}: ${serverMsg}`;
+        }
+        return fallback;
+    }
+
+    private persistLessonsAndResources(courseId: string, lessons: any[]) {
+        return from(lessons).pipe(
+            concatMap((lesson: any, lessonIndex: number) =>
+                this.lessonService.create({
+                    title: lesson.title,
+                    description: lesson.description,
+                    orderIndex: Number(lesson.order) || lessonIndex + 1,
+                    courseId,
+                }).pipe(
+                    concatMap((savedLesson) => {
+                        const resources = lesson.resources ?? [];
+                        if (!resources.length) {
+                            return of(savedLesson).pipe(mapTo(void 0));
+                        }
+                        return from(resources).pipe(
+                            concatMap((resource: any) =>
+                                this.resourceService.create({
+                                    name: resource.name,
+                                    fileUrl: resource.url,
+                                    type: resource.type,
+                                    lessonId: savedLesson.id,
+                                })
+                            ),
+                            toArray(),
+                            mapTo(void 0)
+                        );
+                    })
+                )
+            ),
+            toArray(),
+            mapTo(void 0)
+        );
     }
 }

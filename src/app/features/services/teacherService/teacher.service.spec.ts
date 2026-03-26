@@ -49,8 +49,8 @@ describe('TeacherService', () => {
   });
 
   it('should create a new teacher', () => {
-    const request: UserCreateRequest = { nom: 'Ali', email: 'test@example.com', password: 'pwd', prenom: 'Ahmad' };
-    
+    const request: UserCreateRequest = { id: '', nom: 'Ali', email: 'test@example.com', password: 'pwd', prenom: 'Ahmad', createdAt: '' };
+
     service.create(request).subscribe(res => {
       expect(res?.nom).toBe('Ali');
     });

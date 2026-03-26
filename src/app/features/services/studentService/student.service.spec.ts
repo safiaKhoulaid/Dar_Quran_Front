@@ -25,7 +25,7 @@ describe('StudentService', () => {
   });
 
   it('should get a list of students', () => {
-    const mockStudents: Student[] = [{ id: 1, firstName: 'Ahmad', lastName: 'Ali' } as Student];
+    const mockStudents: Student[] = [{ id: 1, prenom: 'Ahmad', nom: 'Ali', email: 'ahmad@test.com', gender: 'HOMME', createdAt: '2023-01-01' } as Student];
 
     service.getList().subscribe(students => {
       expect(students.length).toBe(1);
@@ -37,9 +37,9 @@ describe('StudentService', () => {
   });
 
   it('should create a new student', () => {
-    const mockStudent: Student = { id: 2, firstName: 'Omar', lastName: 'Farooq' } as Student;
+    const mockStudent: Student = { id: 2, prenom: 'Omar', nom: 'Farooq', email: 'omar@test.com', gender: 'HOMME', createdAt: '2023-01-01' } as Student;
 
-    service.create({ firstName: 'Omar' }).subscribe(student => {
+    service.create({ prenom: 'Omar' }).subscribe(student => {
       expect(student?.id).toBe(2);
     });
 

@@ -6,11 +6,13 @@ import { AuthService } from '@features/services/authService/auth-service';
 export const roleGuard: CanActivateFn = (route, state) => {
 
   const authService = inject(AuthService);
+
   const router = inject(Router);
 
   const tokenRole = authService.getRoleFromToken() ?? '';
 
   let storageRole = '';
+
   try {
     const raw = localStorage.getItem('auth_user');
     if (raw) {
@@ -24,15 +26,12 @@ export const roleGuard: CanActivateFn = (route, state) => {
   const normalisedStorageRole = storageRole.replace(/^ROLE_/i, '').toUpperCase();
   const userRole = (tokenRole || normalisedStorageRole).replace(/^ROLE_/i, '').toUpperCase();
 
-  console.log('[RoleGuard] token role:', tokenRole, '| storage role:', normalisedStorageRole, '| using:', userRole);
 
   const expectedRoles = route.data['roles'] as string[];
-  console.log('[RoleGuard] Expected:', expectedRoles);
 
   if (userRole && expectedRoles.includes(userRole)) {
     return true;
   }
 
-  // Ila ma-3ndoch l-haq, n-siftohl-page "Unauthorized" awla "Login"
   return router.parseUrl('/unauthorized');
 };

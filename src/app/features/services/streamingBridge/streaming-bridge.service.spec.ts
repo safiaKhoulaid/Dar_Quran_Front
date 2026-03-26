@@ -17,15 +17,17 @@ describe('StreamingBridgeService', () => {
     expect(service).toBeTruthy();
   });
 
-  it('should emit error when startStreaming is called without a streamKey', (done) => {
-    const mockMediaStream = new MediaStream();
-    
-    service.status$.subscribe(status => {
-      expect(status).toBe('error');
-      done();
-    });
+  it('should emit error when startStreaming is called without a streamKey', () => {
+    return new Promise<void>((resolve) => {
+      const mockMediaStream = new MediaStream();
 
-    service.startStreaming('', mockMediaStream);
+      service.status$.subscribe(status => {
+        expect(status).toBe('error');
+        resolve();
+      });
+
+      service.startStreaming('', mockMediaStream);
+    });
   });
 
   it('should return disconnected as initial status', () => {
