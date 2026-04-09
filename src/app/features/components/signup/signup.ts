@@ -51,13 +51,13 @@ export class SignupComponent {
         // Assuming AuthService will have a register method or we'll add one
         // For now, let's mock the call or add it to AuthService
         const payload = {
-            firstname: this.signupForm.value.firstname || '',
-            lastname: this.signupForm.value.lastname || '',
+            prenom: this.signupForm.value.firstname || '',
+            nom: this.signupForm.value.lastname || '',
             email: this.signupForm.value.email || '',
             password: this.signupForm.value.password || ''
         };
 
-        // If authService doesn't have register, this will fail. 
+        // If authService doesn't have register, this will fail.
         // I'll add a minimal register to AuthService in the next tool call.
         this.authService.register(payload).subscribe({
             next: () => {
